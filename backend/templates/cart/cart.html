@@ -1,0 +1,68 @@
+<!-- templates/cart/cart.html -->
+{% extends 'base.html' %}
+
+{% block title %}Sepetim{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="cart-page">
+        <h1>Alışveriş Sepetim</h1>
+        
+        {% if cart_items %}
+            <div class="cart-items">
+                {% for item in cart_items %}
+                <div class="cart-item" data-product-id="{{ item.product.id }}">
+                    <div class="item-image">
+                        <img src="{{ url_for('static', filename='images/products/' + item.product.image) if item.product.image else url_for('static', filename='images/no-image.png') }}" 
+                             alt="{{ item.product.name }}">
+                    </div>
+                    <div class="item-details">
+                        <h3>{{ item.product.name }}</h3>
+                        <div class="item-price">{{ "%.2f"|format(item.product.price) }} TL</div>
+                    </div>
+                    <div class="item-quantity">
+                        <button class="quantity-btn minus">-</button>
+                        <input type="number" value="{{ item.quantity }}" min="1" 
+                               class="quantity-input">
+                        <button class="quantity-btn plus">+</button>
+                    </div>
+                    <div class="item-total">
+                        {{ "%.2f"|format(item.product.price * item.quantity) }} TL
+                    </div>
+                    <button class="remove-item">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Ara Toplam:</span>
+                    <span>{{ "%.2f"|format(total) }} TL</span>
+                </div>
+                <div class="summary-row">
+                    <span>Kargo:</span>
+                    <span>{% if total >= 1000 %}Ücretsiz{% else %}29.90 TL{% endif %}</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Toplam:</span>
+                    <span>{{ "%.2f"|format(total if total >= 1000 else total + 29.90) }} TL</span>
+                </div>
+                
+                <button class="btn btn-primary checkout-btn">
+                    Alışverişi Tamamla
+                </button>
+            </div>
+        {% else %}
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <p>Sepetinizde ürün bulunmamaktadır.</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    Alışverişe Başla
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

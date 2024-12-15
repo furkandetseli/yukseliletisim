@@ -1,0 +1,37 @@
+<!-- backend/templates/index.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero-slider">
+    <div class="slider-wrapper">
+        <div class="slide active">
+            <div class="slide-content">
+                <h2>BRABUS PREMİUM</h2>
+                <h3>SONIC KILIF</h3>
+                <div class="slide-image">
+                    <img src="{{ url_for('static', filename='images/products/iphone-case.png') }}" alt="Brabus Premium Sonic Kılıf">
+                </div>
+            </div>
+        </div>
+        <!-- Diğer slider içerikleri buraya gelecek -->
+    </div>
+    <button class="slider-nav prev" aria-label="Önceki"><i class="fas fa-chevron-left"></i></button>
+    <button class="slider-nav next" aria-label="Sonraki"><i class="fas fa-chevron-right"></i></button>
+</div>
+
+<div class="category-nav">
+    <div class="container">
+        <nav>
+            <ul>
+                <li><a href="/bilgisayar-tablet">BİLGİSAYAR & TABLET</a></li>
+                <li><a href="/arac-aksesuari">ARAÇ AKSESUARI</a></li>
+                <li><a href="/el-feneri-aydinlatma">EL FENERİ & AYDINLATMA</a></li>
+                <li><a href="/powerbank">POWERBANK</a></li>
+                <li><a href="/telefon-aksesuari">TELEFON AKSESUARI</a></li>
+                <li><a href="/tv-goruntu-ses">TV & GÖRÜNTÜ & SES</a></li>
+                <li><a href="/outlet" class="outlet">OUTLET ÜRÜNLER</a></li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}

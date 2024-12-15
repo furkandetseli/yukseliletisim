@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Yüksel İletişim - Admin Panel{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="admin-logo">
+                <h1>Admin Panel</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="{{ url_for('admin.dashboard') }}" {% if request.endpoint == 'admin.dashboard' %}class="active"{% endif %}>
+                            <i class="fas fa-home"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.products') }}" {% if request.endpoint == 'admin.products' %}class="active"{% endif %}>
+                            <i class="fas fa-box"></i>
+                            <span>Ürünler</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.users') }}" {% if request.endpoint == 'admin.users' %}class="active"{% endif %}>
+                            <i class="fas fa-users"></i>
+                            <span>Kullanıcılar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('index') }}" target="_blank">
+                            <i class="fas fa-globe"></i>
+                            <span>Siteyi Görüntüle</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="header-left">
+                    <h2>{% block page_title %}{% endblock %}</h2>
+                </div>
+                <div class="header-right">
+                    <div class="admin-user">
+                        <span>{{ current_user.first_name }} {{ current_user.last_name }}</span>
+                        <a href="{{ url_for('logout') }}" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Çıkış
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

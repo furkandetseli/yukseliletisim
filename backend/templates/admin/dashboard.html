@@ -1,0 +1,128 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Yönetim Paneli - Dashboard{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- İstatistik Kartları -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>Toplam Kullanıcı</h3>
+        <div class="value">{{ total_users }}</div>
+        <div class="stat-footer">
+            <i class="fas fa-users"></i>
+            Kayıtlı Kullanıcı
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <h3>Toplam Ürün</h3>
+        <div class="value">{{ total_products }}</div>
+        <div class="stat-footer">
+            <i class="fas fa-box"></i>
+            Aktif Ürün
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <h3>Stoğu Azalan</h3>
+        <div class="value">{{ low_stock_count }}</div>
+        <div class="stat-footer">
+            <i class="fas fa-exclamation-triangle"></i>
+            10'dan az kalan ürün
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <h3>Bekleyen Siparişler</h3>
+        <div class="value">{{ pending_orders }}</div>
+        <div class="stat-footer">
+            <i class="fas fa-clock"></i>
+            Onay Bekleyen
+        </div>
+    </div>
+</div>
+
+<!-- Son Eklenen Ürünler -->
+<div class="content-section">
+    <div class="section-header">
+        <h2>Son Eklenen Ürünler</h2>
+        <a href="{{ url_for('admin.products') }}" class="btn btn-primary">Tüm Ürünler</a>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ürün Adı</th>
+                    <th>Kategori</th>
+                    <th>Fiyat</th>
+                    <th>Stok</th>
+                    <th>Eklenme Tarihi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in latest_products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category }}</td>
+                    <td>{{ "%.2f"|format(product.price) }} TL</td>
+                    <td>
+                        {% if product.stock < 10 %}
+                        <span class="badge badge-warning">{{ product.stock }}</span>
+                        {% else %}
+                        <span class="badge badge-success">{{ product.stock }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ product.created_at.strftime('%d.%m.%Y') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Son Kayıt Olan Kullanıcılar -->
+<div class="content-section">
+    <div class="section-header">
+        <h2>Son Kayıt Olan Kullanıcılar</h2>
+        <a href="{{ url_for('admin.users') }}" class="btn btn-primary">Tüm Kullanıcılar</a>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ad Soyad</th>
+                    <th>Email</th>
+                    <th>Kayıt Tarihi</th>
+                    <th>Son Giriş</th>
+                    <th>Durum</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in latest_users %}
+                <tr>
+                    <td>{{ user.first_name }} {{ user.last_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.created_at.strftime('%d.%m.%Y') }}</td>
+                    <td>
+                        {% if user.last_login %}
+                        {{ user.last_login.strftime('%d.%m.%Y %H:%M') }}
+                        {% else %}
+                        Henüz Giriş Yapmadı
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_active %}
+                        <span class="badge badge-success">Aktif</span>
+                        {% else %}
+                        <span class="badge badge-danger">Pasif</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

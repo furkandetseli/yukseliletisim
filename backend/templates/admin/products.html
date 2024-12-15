@@ -1,0 +1,103 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Ürün Yönetimi{% endblock %}
+
+{% block page_title %}Ürünler{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h2>Ürün Listesi</h2>
+    <a href="{{ url_for('admin.add_product') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i>
+        Yeni Ürün Ekle
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Ürün Adı</th>
+                <th>Kategori</th>
+                <th>Fiyat</th>
+                <th>Stok</th>
+                <th>Eklenme Tarihi</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products.items %}
+            <tr>
+                <td>{{ product.id }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category }}</td>
+                <td>{{ "%.2f"|format(product.price) }} TL</td>
+                <td>
+                    {% if product.stock < 10 %}
+                    <span class="badge badge-warning">{{ product.stock }}</span>
+                    {% else %}
+                    <span class="badge badge-success">{{ product.stock }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ product.created_at.strftime('%d.%m.%Y') }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('admin.edit_product', id=product.id) }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button onclick="confirmDelete('{{ product.id }}')" class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Sayfalama -->
+<div class="pagination">
+    {% if products.has_prev %}
+    <a href="{{ url_for('admin.products', page=products.prev_num) }}" class="btn btn-outline">Önceki</a>
+    {% endif %}
+    
+    <span class="current-page">Sayfa {{ products.page }} / {{ products.pages }}</span>
+    
+    {% if products.has_next %}
+    <a href="{{ url_for('admin.products', page=products.next_num) }}" class="btn btn-outline">Sonraki</a>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete(productId) {
+    if (confirm('Bu ürünü silmek istediğinizden emin misiniz?')) {
+        deleteProduct(productId);
+    }
+}
+
+function deleteProduct(productId) {
+    fetch('/admin/products/delete/' + productId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(function(response) {
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert('Bir hata oluştu!');
+        }
+    })
+    .catch(function(error) {
+        console.error('Error:', error);
+        alert('Bir hata oluştu!');
+    });
+}
+</script>
+{% endblock %}

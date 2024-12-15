@@ -1,0 +1,29 @@
+yukseliletisim/
+├── backend/
+│   ├── static/
+│   │   ├── css/
+│   │   │   ├── main.css (Ana stiller)
+│   │   │   ├── product.css (Ürün sayfaları stilleri)
+│   │   │   └── auth.css (Giriş/kayıt stilleri)
+│   │   ├── js/
+│   │   │   ├── main.js (Ana JavaScript)
+│   │   │   └── cart.js (Sepet işlemleri)
+│   │   └── images/
+│   │       ├── products/ (Ürün görselleri)
+│   │       ├── default-logo.png
+│   │       └── no-image.png
+│   ├── templates/
+│   │   ├── auth/
+│   │   │   ├── login.html
+│   │   │   └── register.html
+│   │   ├── products/
+│   │   │   ├── detail.html
+│   │   │   └── category.html
+│   │   ├── cart/
+│   │   │   └── cart.html
+│   │   ├── base.html (Ana template)
+│   │   └── index.html (Ana sayfa)
+│   ├── database/
+│   │   └── database.sqlite
+│   └── app.py (Ana uygulama)
+└── requirements.txt

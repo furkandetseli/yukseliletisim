@@ -1,0 +1,382 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Kullanıcı Yönetimi{% endblock %}
+
+{% block page_title %}Kullanıcılar{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h2>Kullanıcı Listesi</h2>
+    <div class="actions">
+        <div class="search-box">
+            <input type="text" id="userSearch" placeholder="Kullanıcı ara..." class="search-input">
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Ad Soyad</th>
+                <th>E-posta</th>
+                <th>Kayıt Tarihi</th>
+                <th>Son Giriş</th>
+                <th>Durum</th>
+                <th>Yetki</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users.items %}
+            <tr data-user-id="{{ user.id }}">
+                <td>{{ user.id }}</td>
+                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.created_at.strftime('%d.%m.%Y') }}</td>
+                <td>
+                    {% if user.last_login %}
+                        {{ user.last_login.strftime('%d.%m.%Y %H:%M') }}
+                    {% else %}
+                        Henüz giriş yapmadı
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="status-toggle">
+                        <label class="switch">
+                            <input type="checkbox" 
+                                   {% if user.is_active %}checked{% endif %}
+                                   onchange="toggleUserStatus('{{ user.id }}, this.checked')"
+                                   {% if user.is_admin %}disabled{% endif %}>
+                            <span class="slider round"></span>
+                        </label>
+                        <span class="status-text">{{ 'Aktif' if user.is_active else 'Pasif' }}</span>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge {{ 'badge-primary' if user.is_admin else 'badge-secondary' }}">
+                        {{ 'Admin' if user.is_admin else 'Kullanıcı' }}
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button onclick="showUserDetails('{{ user.id }}')" class="btn btn-sm btn-info">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        {% if not user.is_admin %}
+                        <button onclick="deleteUser('{{ user.id }}')" class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Sayfalama -->
+<div class="pagination">
+    {% if users.has_prev %}
+    <a href="{{ url_for('admin.users', page=users.prev_num) }}" class="btn btn-outline">Önceki</a>
+    {% endif %}
+    
+    <span class="current-page">Sayfa {{ users.page }} / {{ users.pages }}</span>
+    
+    {% if users.has_next %}
+    <a href="{{ url_for('admin.users', page=users.next_num) }}" class="btn btn-outline">Sonraki</a>
+    {% endif %}
+</div>
+
+<!-- Kullanıcı Detay Modal -->
+<div id="userModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Kullanıcı Detayları</h3>
+        <div id="userDetails"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.search-box {
+    margin-bottom: 20px;
+}
+
+.search-input {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    width: 250px;
+}
+
+.status-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Switch Button */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+}
+
+.close {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.badge-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.badge-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+}
+/* Modal için ek stiller */
+.user-detail-grid {
+    display: grid;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #666;
+}
+
+.detail-value {
+    color: #333;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #333;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Kullanıcı arama fonksiyonu
+document.getElementById('userSearch').addEventListener('input', function(e) {
+    let searchTerm = e.target.value.toLowerCase();
+    let rows = document.querySelectorAll('.data-table tbody tr');
+    
+    rows.forEach(row => {
+        let text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+// Kullanıcı durumunu değiştirme
+function toggleUserStatus(userId, status) {
+    fetch(`/admin/users/${userId}/toggle-status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const statusText = document.querySelector(`tr[data-user-id="${userId}"] .status-text`);
+            statusText.textContent = status ? 'Aktif' : 'Pasif';
+        } else {
+            alert('Durum güncellenirken bir hata oluştu!');
+        }
+    });
+}
+
+// Kullanıcı silme
+function deleteUser(userId) {
+    if (confirm('Bu kullanıcıyı silmek istediğinizden emin misiniz?')) {
+        fetch(`/admin/users/${userId}/delete`, {
+            method: 'POST'
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Kullanıcı silinirken bir hata oluştu!');
+            }
+        });
+    }
+}
+
+// Kullanıcı detayları modalı
+// Kullanıcı detayları görüntüleme fonksiyonunu güncelleyelim
+function showUserDetails(userId) {
+    fetch(`/admin/users/${userId}/details`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Kullanıcı bilgileri alınamadı');
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('userDetails').innerHTML = `
+                <div class="user-detail-grid">
+                    <div class="detail-row">
+                        <span class="detail-label">Ad Soyad:</span>
+                        <span class="detail-value">${data.first_name} ${data.last_name}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">E-posta:</span>
+                        <span class="detail-value">${data.email}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Telefon:</span>
+                        <span class="detail-value">${data.phone}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Kayıt Tarihi:</span>
+                        <span class="detail-value">${data.created_at}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Son Giriş:</span>
+                        <span class="detail-value">${data.last_login}</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('userModal').style.display = 'block';
+        })
+        .catch(error => {
+            alert('Bir hata oluştu: ' + error.message);
+        });
+}
+// Modal kapatma
+document.querySelector('.close').onclick = function() {
+    document.getElementById('userModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    let modal = document.getElementById('userModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yüksel İletişim</title>
+    <link rel="stylesheet" href="../src/css/main.css">
+    <link rel="stylesheet" href="../src/css/header.css">
+    <link rel="stylesheet" href="../src/css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="announcement-bar">
+        TÜRKİYE'NİN HER NOKTASINA 1.000 TL VE ÜZERİ TÜM SİPARİŞLERDE KARGO BEDAVA!
+    </div>
+    
+    <header>
+        <div class="top-bar">
+            <div class="contact-info">
+                <a href="tel:05305600735"><i class="fas fa-phone"></i> 0530 560 0735</a>
+                <a href="https://wa.me/05305600735"><i class="fab fa-whatsapp"></i> 0530 560 0735</a>
+                <a href="mailto:info@yukseliletisim.com"><i class="fas fa-envelope"></i> info@yukseliletisim.com</a>
+            </div>
+            <div class="top-menu">
+                <a href="/hakkimizda">Hakkımızda</a>
+                <a href="/yardim">Yardım</a>
+                <a href="/iletisim">İletişim</a>
+                <a href="/siparis-takibi">Sipariş Takibi</a>
+            </div>
+        </div>
+
+        <div class="main-header">
+            <div class="logo">
+                <a href="/">
+                    <img src="images/logo.png" alt="Yüksel İletişim">
+                </a>
+            </div>
+            <div class="search-container">
+                <input type="text" placeholder="Hangi ürünü aramıştınız?">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </div>
+            <div class="user-actions">
+                <a href="/hesabim" class="account-link">
+                    <i class="fas fa-user"></i>
+                    <span>Hesabım</span>
+                </a>
+                <a href="/sepetim" class="cart-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Sepetim</span>
+                    <span class="cart-count">0</span>
+                </a>
+            </div>
+        </div>
+
+        <nav class="main-nav">
+            <ul>
+                <li><a href="/bilgisayar-tablet">Bilgisayar & Tablet</a></li>
+                <li><a href="/arac-aksesuari">Araç Aksesuarı</a></li>
+                <li><a href="/telefon-aksesuari">Telefon Aksesuarı</a></li>
+                <li><a href="/teknik-servis">Teknik Servis</a></li>
+                <li><a href="/powerbank">Powerbank</a></li>
+                <li><a href="/tv-goruntu-ses">TV & Görüntü & Ses</a></li>
+                <li><a href="/outlet" class="outlet">Outlet Ürünler</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="carousel">
+            <div class="carousel-container">
+                <div class="carousel-slide active">
+                    <img src="images/slide1.jpg" alt="Kampanya 1">
+                </div>
+                <div class="carousel-slide">
+                    <img src="images/slide2.jpg" alt="Kampanya 2">
+                </div>
+                <div class="carousel-slide">
+                    <img src="images/slide3.jpg" alt="Kampanya 3">
+                </div>
+                <button class="carousel-prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-next"><i class="fas fa-chevron-right"></i></button>
+                <div class="carousel-dots"></div>
+            </div>
+        </section>
+
+        <section class="products">
+            <h2>Öne Çıkan Ürünler</h2>
+            <div class="product-grid">
+                <!-- Ürün kartları dinamik olarak JavaScript ile eklenecek -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Kurumsal</h3>
+                <ul>
+                    <li><a href="/hakkimizda">Hakkımızda</a></li>
+                    <li><a href="/iletisim">İletişim</a></li>
+                    <li><a href="/kariyer">Kariyer</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Müşteri Hizmetleri</h3>
+                <ul>
+                    <li><a href="/siparis-takibi">Sipariş Takibi</a></li>
+                    <li><a href="/iade-kosullari">İade Koşulları</a></li>
+                    <li><a href="/gizlilik">Gizlilik Politikası</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>İletişim</h3>
+                <p>Telefon: 0530 560 0735</p>
+                <p>E-posta: info@yukseliletisim.com</p>
+                <div class="social-media">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Yüksel İletişim. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <script src="../src/js/main.js"></script>
+    <script src="../src/js/carousel.js"></script>
+</body>
+</html>

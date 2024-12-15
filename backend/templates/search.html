@@ -1,0 +1,44 @@
+<!-- templates/search.html -->
+{% extends 'base.html' %}
+
+{% block title %}Arama Sonuçları - {{ query }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="search-results">
+        <h1>Arama Sonuçları</h1>
+        <p class="search-query">"{{ query }}" için {{ products|length }} sonuç bulundu</p>
+
+        {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="{{ url_for('static', filename='images/products/' + product.image) if product.image else url_for('static', filename='images/no-image.png') }}" 
+                         alt="{{ product.name }}">
+                </div>
+                <div class="product-info">
+                    <h3>{{ product.name }}</h3>
+                    <div class="price">{{ "%.2f"|format(product.price) }} TL</div>
+                    <button class="btn btn-primary add-to-cart" 
+                            data-product-id="{{ product.id }}">
+                        Sepete Ekle
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-results">
+            <p>Aramanızla eşleşen ürün bulunamadı.</p>
+            <p>Öneriler:</p>
+            <ul>
+                <li>Farklı arama kelimeleri deneyin</li>
+                <li>Daha genel terimler kullanın</li>
+                <li>Yazım hatası olmadığından emin olun</li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

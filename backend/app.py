@@ -4,7 +4,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 import os
 
 from extensions import db, login_manager, migrate, csrf
-from models import User, Product, CartItem
+from models import * 
 
 def create_app():
     app = Flask(__name__)
@@ -42,8 +42,19 @@ def create_app():
     # Routes
     @app.route('/')
     def index():
-        products = Product.query.order_by(Product.created_at.desc()).limit(8).all()
-        return render_template('index.html', products=products)
+        # Ana kategorileri al (parent_id'si None olanlar)
+        categories = Category.query.filter_by(parent_id=None).order_by(Category.order.asc()).all()
+        
+        # Rastgele 8 ürün al
+        featured_products = Product.query.order_by(db.func.random()).limit(8).all()
+        
+        # En son eklenen 8 ürün
+        new_products = Product.query.order_by(Product.created_at.desc()).limit(8).all()
+        
+        return render_template('index.html', 
+                            categories=categories,
+                            featured_products=featured_products,
+                            new_products=new_products)
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():

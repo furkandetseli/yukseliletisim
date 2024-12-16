@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Yüksel İletişim - Admin Panel{% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
@@ -28,6 +29,18 @@
                         <a href="{{ url_for('admin.products') }}" {% if request.endpoint == 'admin.products' %}class="active"{% endif %}>
                             <i class="fas fa-box"></i>
                             <span>Ürünler</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.orders') }}" {% if request.endpoint == 'admin.orders' %}class="active"{% endif %}>
+                            <i class="fas fa-ship"></i>
+                            <span>Siparişler</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.categories') }}" {% if request.endpoint == 'admin.categories' %}class="active"{% endif %}>
+                            <i class="fas fa-sitemap"></i>
+                            <span>Kategoriler</span>
                         </a>
                     </li>
                     <li>

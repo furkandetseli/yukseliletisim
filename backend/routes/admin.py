@@ -11,6 +11,7 @@ from flask import (
 from flask_login import login_required, current_user
 from functools import wraps
 from models import User, Product
+from models import User, Product, Order, OrderItem, Category  # Order ve OrderItem ekledik
 from extensions import db
 from werkzeug.utils import secure_filename
 import os
@@ -52,21 +53,46 @@ def dashboard():
     total_users = User.query.count()
     total_products = Product.query.count()
     low_stock_count = Product.query.filter(Product.stock < 10).count()
-    pending_orders = 0  # Sipariş sistemi eklendiğinde güncellenecek
+    
+    # Sipariş istatistikleri
+    total_orders = Order.query.count()
+    pending_orders = Order.query.filter_by(status='Beklemede').count()
+    completed_orders = Order.query.filter_by(status='Tamamlandı').count()
+    
+    # Ciro hesaplama
+    total_revenue = db.session.query(db.func.sum(Order.total_amount))\
+        .filter(Order.status != 'İptal')\
+        .scalar() or 0
     
     # Son eklenen ürünler
-    latest_products = Product.query.order_by(Product.created_at.desc()).limit(5).all()
+    latest_products = Product.query\
+        .order_by(Product.created_at.desc())\
+        .limit(5)\
+        .all()
     
     # Son kayıt olan kullanıcılar
-    latest_users = User.query.order_by(User.created_at.desc()).limit(5).all()
+    latest_users = User.query\
+        .order_by(User.created_at.desc())\
+        .limit(5)\
+        .all()
+    
+    # Son siparişler
+    latest_orders = Order.query\
+        .order_by(Order.created_at.desc())\
+        .limit(5)\
+        .all()
     
     return render_template('admin/dashboard.html',
                          total_users=total_users,
                          total_products=total_products,
                          low_stock_count=low_stock_count,
+                         total_orders=total_orders,
                          pending_orders=pending_orders,
+                         completed_orders=completed_orders,
+                         total_revenue=total_revenue,
                          latest_products=latest_products,
-                         latest_users=latest_users)
+                         latest_users=latest_users,
+                         latest_orders=latest_orders)
 
 @admin_bp.route('/products')
 @login_required
@@ -227,3 +253,193 @@ def user_details(id):
     }
     
     return jsonify(data)
+
+@admin_bp.route('/orders')
+@login_required
+@admin_required
+def orders():
+    page = request.args.get('page', 1, type=int)
+    status = request.args.get('status', None)
+    
+    query = Order.query
+    
+    if status:
+        query = query.filter_by(status=status)
+        
+    orders = query.order_by(Order.created_at.desc()).paginate(
+        page=page, per_page=20)
+    
+    return render_template('admin/orders.html', orders=orders)
+
+@admin_bp.route('/orders/<int:id>')
+@login_required
+@admin_required
+def order_detail(id):
+    order = Order.query.get_or_404(id)
+    return render_template('admin/order_detail.html', order=order)
+
+@admin_bp.route('/orders/<int:id>/update-status', methods=['POST'])
+@login_required
+@admin_required
+def update_order_status(id):
+    if not request.is_json:
+        return jsonify({'success': False, 'message': 'Invalid content type'}), 400
+        
+    order = Order.query.get_or_404(id)
+    data = request.get_json()
+    
+    try:
+        if not data or 'status' not in data:
+            return jsonify({'success': False, 'message': 'Status not provided'}), 400
+            
+        order.status = data['status']
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Status updated successfully',
+            'new_status': order.status
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        }), 500
+    
+@admin_bp.route('/categories')
+@login_required
+@admin_required
+def categories():
+    categories = Category.query.order_by(Category.order.asc()).all()
+    return render_template('admin/categories/index.html', categories=categories)
+
+@admin_bp.route('/categories/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_category():
+    if request.method == 'POST':
+        try:
+            category = Category(
+                name=request.form.get('name'),
+                description=request.form.get('description'),
+                parent_id=request.form.get('parent_id') or None,
+                is_active=bool(request.form.get('is_active')),
+                order=request.form.get('order', 0),
+                meta_title=request.form.get('meta_title'),
+                meta_description=request.form.get('meta_description')
+            )
+            
+            # Handle image upload
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], 'categories', filename))
+                    category.image = filename
+
+            db.session.add(category)
+            db.session.commit()
+            flash('Kategori başarıyla oluşturuldu.', 'success')
+            return redirect(url_for('admin.categories'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Kategori oluşturulurken bir hata oluştu: {str(e)}', 'error')
+    
+    parent_categories = Category.query.filter_by(parent_id=None).all()
+    return render_template('admin/categories/form.html', parent_categories=parent_categories)
+
+@admin_bp.route('/categories/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_category(id):
+    category = Category.query.get_or_404(id)
+    
+    if request.method == 'POST':
+        try:
+            category.name = request.form.get('name')
+            category.description = request.form.get('description')
+            category.parent_id = request.form.get('parent_id') or None
+            category.is_active = bool(request.form.get('is_active'))
+            category.order = request.form.get('order', 0)
+            category.meta_title = request.form.get('meta_title')
+            category.meta_description = request.form.get('meta_description')
+            
+            # Handle image upload
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and allowed_file(file.filename):
+                    # Delete old image if exists
+                    if category.image:
+                        old_image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'categories', category.image)
+                        if os.path.exists(old_image_path):
+                            os.remove(old_image_path)
+                    
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], 'categories', filename))
+                    category.image = filename
+
+            db.session.commit()
+            flash('Kategori başarıyla güncellendi.', 'success')
+            return redirect(url_for('admin.categories'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Kategori güncellenirken bir hata oluştu: {str(e)}', 'error')
+    
+    parent_categories = Category.query.filter(Category.id != id, Category.parent_id != id).all()
+    return render_template('admin/categories/form.html', 
+                         category=category, 
+                         parent_categories=parent_categories)
+
+@admin_bp.route('/categories/delete/<int:id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_category(id):
+    category = Category.query.get_or_404(id)
+    
+    try:
+        # Delete category image if exists
+        if category.image:
+            image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'categories', category.image)
+            if os.path.exists(image_path):
+                os.remove(image_path)
+        
+        # Update products' category to None
+        for product in category.products:
+            product.category_id = None
+        
+        # Delete category
+        db.session.delete(category)
+        db.session.commit()
+        
+        flash('Kategori başarıyla silindi.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Kategori silinirken bir hata oluştu: {str(e)}', 'error')
+    
+    return redirect(url_for('admin.categories'))
+
+@admin_bp.route('/categories/reorder', methods=['POST'])
+@login_required
+@admin_required
+def reorder_categories():
+    try:
+        categories = request.get_json()
+        for category in categories:
+            cat = Category.query.get(category['id'])
+            if cat:
+                cat.parent_id = category.get('parent_id')
+                cat.order = category.get('order', 0)
+        
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)})
+
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

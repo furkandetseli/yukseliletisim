@@ -1,37 +1,347 @@
-<!-- backend/templates/index.html -->
+<!-- templates/index.html -->
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="hero-slider">
-    <div class="slider-wrapper">
-        <div class="slide active">
-            <div class="slide-content">
-                <h2>BRABUS PREMİUM</h2>
-                <h3>SONIC KILIF</h3>
-                <div class="slide-image">
-                    <img src="{{ url_for('static', filename='images/products/iphone-case.png') }}" alt="Brabus Premium Sonic Kılıf">
+<!-- Hero Section -->
+<section class="hero-slider">
+    <div class="container">
+        <div class="slider-wrapper">
+            <div class="slide active">
+                <div class="slide-content">
+                    <div class="slide-text">
+                        <h2>Teknoloji Dünyasına Hoş Geldiniz</h2>
+                        <p>En yeni telefon ve aksesuarlar burada!</p>
+                        <a href="#featured" class="btn btn-primary">Ürünleri Keşfet</a>
+                    </div>
+                    <div class="slide-image">
+                        <img src="{{ url_for('static', filename='images/hero-image.png') }}" 
+                             alt="Hero Image">
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- Diğer slider içerikleri buraya gelecek -->
     </div>
-    <button class="slider-nav prev" aria-label="Önceki"><i class="fas fa-chevron-left"></i></button>
-    <button class="slider-nav next" aria-label="Sonraki"><i class="fas fa-chevron-right"></i></button>
-</div>
+</section>
 
-<div class="category-nav">
+<!-- Kategoriler -->
+<section class="categories-section">
     <div class="container">
-        <nav>
-            <ul>
-                <li><a href="/bilgisayar-tablet">BİLGİSAYAR & TABLET</a></li>
-                <li><a href="/arac-aksesuari">ARAÇ AKSESUARI</a></li>
-                <li><a href="/el-feneri-aydinlatma">EL FENERİ & AYDINLATMA</a></li>
-                <li><a href="/powerbank">POWERBANK</a></li>
-                <li><a href="/telefon-aksesuari">TELEFON AKSESUARI</a></li>
-                <li><a href="/tv-goruntu-ses">TV & GÖRÜNTÜ & SES</a></li>
-                <li><a href="/outlet" class="outlet">OUTLET ÜRÜNLER</a></li>
-            </ul>
-        </nav>
+        <div class="section-header">
+            <h2>Kategoriler</h2>
+        </div>
+        <div class="categories-grid">
+            {% for category in categories %}
+            <div class="category-card">
+                <a href="{{ url_for('category_products', category_name=category.name) }}">
+                    {% if category.image %}
+                    <img src="{{ url_for('static', filename='images/categories/' + category.image) }}"
+                         alt="{{ category.name }}">
+                    {% else %}
+                    <div class="category-icon">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                    {% endif %}
+                    <h3>{{ category.name }}</h3>
+                    {% if category.children.count() > 0 %}
+                    <span class="subcategory-count">{{ category.children.count() }} Alt Kategori</span>
+                    {% endif %}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
     </div>
-</div>
+</section>
+
+<!-- Öne Çıkan Ürünler -->
+<section class="featured-products" id="featured">
+    <div class="container">
+        <div class="section-header">
+            <h2>Öne Çıkan Ürünler</h2>
+            <a href="{{ url_for('admin.products') }}" class="view-all">Tümünü Gör</a>
+        </div>
+        <div class="product-grid">
+            {% for product in featured_products %}
+            <div class="product-card">
+                <div class="product-image">
+                    {% if product.image %}
+                    <img src="{{ url_for('static', filename='images/products/' + product.image) }}"
+                         alt="{{ product.name }}">
+                    {% else %}
+                    <div class="no-image">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <h3>{{ product.name }}</h3>
+                    <div class="price">{{ "%.2f"|format(product.price) }} TL</div>
+                    {% if product.stock > 0 %}
+                    <button onclick="addToCart(`{{ product.id }}`)" class="btn btn-primary add-to-cart">
+                        <i class="fas fa-shopping-cart"></i> Sepete Ekle
+                    </button>
+                    {% else %}
+                    <button class="btn btn-secondary" disabled>Stokta Yok</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Yeni Ürünler -->
+<section class="new-products">
+    <div class="container">
+        <div class="section-header">
+            <h2>Yeni Ürünler</h2>
+            <a href="{{ url_for('admin.products') }}" class="view-all">Tümünü Gör</a>
+        </div>
+        <div class="product-grid">
+            {% for product in new_products %}
+            <div class="product-card">
+                <div class="product-image">
+                    {% if product.image %}
+                    <img src="{{ url_for('static', filename='images/products/' + product.image) }}"
+                         alt="{{ product.name }}">
+                    {% else %}
+                    <div class="no-image">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <h3>{{ product.name }}</h3>
+                    <div class="price">{{ "%.2f"|format(product.price) }} TL</div>
+                    {% if product.stock > 0 %}
+                    <button onclick="addToCart(`{{ product.id }}`)" class="btn btn-primary add-to-cart">
+                        <i class="fas fa-shopping-cart"></i> Sepete Ekle
+                    </button>
+                    {% else %}
+                    <button class="btn btn-secondary" disabled>Stokta Yok</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Hero Section */
+.hero-slider {
+    background: linear-gradient(135deg, #f6f9fc 0%, #e9eef5 100%);
+    padding: 60px 0;
+    margin-bottom: 60px;
+}
+
+.slide-content {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.slide-text {
+    flex: 1;
+}
+
+.slide-text h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+.slide-text p {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.slide-image {
+    flex: 1;
+    text-align: center;
+}
+
+.slide-image img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Categories Section */
+.categories-section {
+    margin-bottom: 60px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.category-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+}
+
+.category-card a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    padding: 20px;
+}
+
+.category-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.category-card h3 {
+    margin: 10px 0;
+    font-size: 1.2rem;
+    color: var(--text-color);
+}
+
+.subcategory-count {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Product Sections */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px;
+    margin-bottom: 60px;
+}
+
+.product-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-image {
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    color: #adb5bd;
+    font-size: 2rem;
+}
+
+.product-info {
+    padding: 20px;
+}
+
+.product-info h3 {
+    margin: 0 0 10px;
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.price {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.view-all {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.view-all:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .slide-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .slide-text h2 {
+        font-size: 2rem;
+    }
+
+    .categories-grid,
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function addToCart(productId) {
+    fetch(`/cart/add/${productId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Cart count güncelleme
+            const cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                cartCount.textContent = data.cart_count;
+            }
+            alert('Ürün sepete eklendi!');
+        } else {
+            alert('Bir hata oluştu!');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Bir hata oluştu!');
+    });
+}
+</script>
 {% endblock %}

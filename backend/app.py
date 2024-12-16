@@ -274,8 +274,12 @@ def create_app():
     # Context processor
     @app.context_processor
     def utility_processor():
+        def get_categories():
+            return Category.query.filter_by(parent_id=None).order_by(Category.order.asc()).all()
+        
         return {
-            'cart_count': get_cart_count()
+            'cart_count': get_cart_count(),
+            'categories': get_categories()  # Kategorileri ekledik
         }
 
     return app

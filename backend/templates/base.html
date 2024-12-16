@@ -102,21 +102,119 @@
         </div>
     </header>
 
-    <!-- Ana Navigasyon -->
+   <!-- Ana Navigasyon -->
+    <!-- templates/base.html'deki navigasyon kısmı -->
+
     <nav class="main-nav">
         <div class="container">
-            <ul>
-                <li><a href="{{ url_for('index') }}">BİLGİSAYAR & TABLET</a></li>
-                <li><a href="{{ url_for('index') }}">ARAÇ AKSESUARI</a></li>
-                <li><a href="{{ url_for('index') }}">EL FENERİ & AYDINLATMA</a></li>
-                <li><a href="{{ url_for('index') }}">POWERBANK</a></li>
-                <li><a href="{{ url_for('index') }}">TELEFON AKSESUARI</a></li>
-                <li><a href="{{ url_for('index') }}">TV & GÖRÜNTÜ & SES</a></li>
-                <li><a href="{{ url_for('index') }}" class="outlet">OUTLET ÜRÜNLER</a></li>
-            </ul>
+            <div class="nav-wrapper">
+                <div class="mobile-nav-toggle">
+                    <button id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                
+                <ul class="nav-list">
+                    {% for category in categories %}
+                    <li class="nav-item {% if category.children.count() > 0 %}has-dropdown{% endif %}">
+                        <a href="{{ url_for('category_products', category_name=category.name) }}" class="nav-link">
+                            {{ category.name }}
+                            {% if category.children.count() > 0 %}
+                            <i class="fas fa-chevron-down"></i>
+                            {% endif %}
+                        </a>
+                        {% if category.children.count() > 0 %}
+                        <div class="mega-menu">
+                            <div class="mega-menu-content">
+                                <div class="menu-header">
+                                    <h3>{{ category.name }}</h3>
+                                </div>
+                                <div class="menu-grid">
+                                    {% for subcategory in category.children %}
+                                    <div class="mega-menu-column">
+                                        <div class="column-header">
+                                            <h4>{{ subcategory.name }}</h4>
+                                        </div>
+                                        {% if subcategory.children.count() > 0 %}
+                                        <ul>
+                                            {% for sub_sub in subcategory.children %}
+                                            <li>
+                                                <a href="{{ url_for('category_products', category_name=sub_sub.name) }}">
+                                                    {{ sub_sub.name }}
+                                                </a>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
     </nav>
 
+    <!-- Mobil Menü -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <h3>Menü</h3>
+            <button class="close-menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-menu-content">
+            <ul class="mobile-nav-list">
+                {% for category in categories %}
+                <li class="mobile-nav-item">
+                    <div class="mobile-nav-header">
+                        <a href="{{ url_for('category_products', category_name=category.name) }}">
+                            {{ category.name }}
+                        </a>
+                        {% if category.children.count() > 0 %}
+                        <button class="toggle-submenu">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% if category.children.count() > 0 %}
+                    <ul class="mobile-submenu">
+                        {% for subcategory in category.children %}
+                        <li>
+                            <div class="submenu-header">
+                                <a href="{{ url_for('category_products', category_name=subcategory.name) }}">
+                                    {{ subcategory.name }}
+                                </a>
+                                {% if subcategory.children.count() > 0 %}
+                                <button class="toggle-submenu">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% if subcategory.children.count() > 0 %}
+                            <ul class="mobile-submenu-l2">
+                                {% for sub_sub in subcategory.children %}
+                                <li>
+                                    <a href="{{ url_for('category_products', category_name=sub_sub.name) }}">
+                                        {{ sub_sub.name }}
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
     <!-- Ana İçerik -->
     <main>
         {% block content %}{% endblock %}
@@ -203,3 +301,4 @@
     {% block extra_js %}{% endblock %}
 </body>
 </html>
+

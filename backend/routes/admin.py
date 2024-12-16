@@ -8,10 +8,12 @@ from flask import (
     request, 
     current_app
 )
+import random
+import string
 from flask_login import login_required, current_user
 from functools import wraps
-from models import User, Product
-from models import User, Product, Order, OrderItem, Category  # Order ve OrderItem ekledik
+from models import *
+from models import User, Product, Order, OrderItem, Category, Brand
 from extensions import db
 from werkzeug.utils import secure_filename
 import os
@@ -53,46 +55,22 @@ def dashboard():
     total_users = User.query.count()
     total_products = Product.query.count()
     low_stock_count = Product.query.filter(Product.stock < 10).count()
-    
-    # Sipariş istatistikleri
-    total_orders = Order.query.count()
-    pending_orders = Order.query.filter_by(status='Beklemede').count()
-    completed_orders = Order.query.filter_by(status='Tamamlandı').count()
-    
-    # Ciro hesaplama
-    total_revenue = db.session.query(db.func.sum(Order.total_amount))\
-        .filter(Order.status != 'İptal')\
-        .scalar() or 0
+    pending_orders = 0  # Sipariş sistemi eklendiğinde güncellenecek
     
     # Son eklenen ürünler
-    latest_products = Product.query\
-        .order_by(Product.created_at.desc())\
-        .limit(5)\
-        .all()
+    latest_products = Product.query.order_by(Product.created_at.desc()).limit(5).all()
     
     # Son kayıt olan kullanıcılar
-    latest_users = User.query\
-        .order_by(User.created_at.desc())\
-        .limit(5)\
-        .all()
-    
-    # Son siparişler
-    latest_orders = Order.query\
-        .order_by(Order.created_at.desc())\
-        .limit(5)\
-        .all()
+    latest_users = User.query.order_by(User.created_at.desc()).limit(5).all()
     
     return render_template('admin/dashboard.html',
                          total_users=total_users,
                          total_products=total_products,
                          low_stock_count=low_stock_count,
-                         total_orders=total_orders,
                          pending_orders=pending_orders,
-                         completed_orders=completed_orders,
-                         total_revenue=total_revenue,
                          latest_products=latest_products,
-                         latest_users=latest_users,
-                         latest_orders=latest_orders)
+                         latest_users=latest_users)
+
 
 @admin_bp.route('/products')
 @login_required
@@ -108,29 +86,71 @@ def products():
 @admin_required
 def add_product():
     if request.method == 'POST':
-        image = request.files.get('image')
-        image_filename = save_product_image(image) if image else None
-        
-        product = Product(
-            name=request.form.get('name'),
-            category=request.form.get('category'),
-            price=float(request.form.get('price')),
-            stock=int(request.form.get('stock')),
-            description=request.form.get('description'),
-            image=image_filename
-        )
-        
         try:
+            # Stok kodu oluştur
+            stock_code = Product().generate_stock_code()
+            
+            # Marka kontrolü
+            brand_id = request.form.get('brand_id')
+            if brand_id == 'new':
+                # Yeni marka oluştur
+                brand_name = request.form.get('new_brand_name')
+                brand = Brand(name=brand_name)
+                db.session.add(brand)
+                db.session.flush()  # ID almak için flush
+                brand_id = brand.id
+            
+            # Ürün oluştur
+            product = Product(
+                stock_code=stock_code,
+                name=request.form.get('name'),
+                brand_id=brand_id,
+                category_id=request.form.get('category_id'),
+                price=float(request.form.get('price')),
+                stock=int(request.form.get('stock')),
+                description=request.form.get('description')
+            )
+            
             db.session.add(product)
+            db.session.flush()  # ID almak için flush
+            
+            # Görsel kontrolü ve yükleme
+            images = request.files.getlist('images')
+            if not images or not any(img.filename for img in images):
+                raise ValueError("En az bir ürün görseli gerekli")
+            
+            image_count = 0
+            for image in images:
+                if image.filename:
+                    if image_count >= 5:
+                        break
+                    
+                    filename = secure_filename(f"{product.stock_code}_{image_count}_{image.filename}")
+                    image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    image.save(image_path)
+                    
+                    product_image = ProductImage(
+                        product_id=product.id,
+                        image_path=filename,
+                        is_primary=(image_count == 0)  # İlk resim primary
+                    )
+                    db.session.add(product_image)
+                    image_count += 1
+            
             db.session.commit()
             flash('Ürün başarıyla eklendi.', 'success')
             return redirect(url_for('admin.products'))
+            
         except Exception as e:
             db.session.rollback()
-            flash('Ürün eklenirken bir hata oluştu.', 'error')
-            print(f"Hata: {e}")
-            
-    return render_template('admin/product_form.html')
+            flash(f'Ürün eklenirken bir hata oluştu: {str(e)}', 'error')
+    
+    # Mevcut markaları al
+    brands = Brand.query.order_by(Brand.name).all()
+    parent_categories = Category.query.filter_by(parent_id=None).all()
+    return render_template('admin/product_form.html', 
+                         brands=brands,
+                         parent_categories=parent_categories)
 
 @admin_bp.route('/products/edit/<int:id>', methods=['GET', 'POST'])
 @login_required

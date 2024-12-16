@@ -3,6 +3,8 @@ from extensions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import random
+import string
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -91,15 +93,35 @@ class Category(db.Model):
     def get_tree():
         return Category.query.filter_by(parent_id=None).all()
 
+    # ürünekleme
+class Brand(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    products = db.relationship('Product', backref='brand', lazy=True)
+
+class ProductImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    image_path = db.Column(db.String(200), nullable=False)
+    is_primary = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    stock_code = db.Column(db.String(10), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text)
-    image = db.Column(db.String(200))
+    brand_id = db.Column(db.Integer, db.ForeignKey('brand.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     stock = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Define the relationship
-    category = db.relationship('Category', backref=db.backref('products', lazy=True))
+    images = db.relationship('ProductImage', backref='product', lazy=True)
+    def generate_stock_code(self):
+        while True:
+            # 8 karakter uzunluğunda rastgele bir kod oluştur
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            # Veritabanında mevcut olup olmadığını kontrol et
+            if not Product.query.filter_by(stock_code=code).first():
+                return code

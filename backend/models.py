@@ -5,6 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import random
 import string
+from sqlalchemy.orm import validates
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -117,7 +119,7 @@ class Product(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     stock = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    images = db.relationship('ProductImage', backref='product', lazy=True)
+    images = db.relationship('ProductImage', backref='product', lazy=True, cascade='all, delete-orphan')
     def generate_stock_code(self):
         while True:
             # 8 karakter uzunluğunda rastgele bir kod oluştur
@@ -125,3 +127,9 @@ class Product(db.Model):
             # Veritabanında mevcut olup olmadığını kontrol et
             if not Product.query.filter_by(stock_code=code).first():
                 return code
+    
+@validates('stock_code')
+def validate_stock_code(self, key, stock_code):
+    if not stock_code:
+        return self.generate_stock_code()
+    return stock_code

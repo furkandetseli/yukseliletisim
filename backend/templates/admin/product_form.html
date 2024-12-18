@@ -6,10 +6,11 @@
 
 {% block content %}
 <div class="content-section">
-    <form method="POST" enctype="multipart/form-data" class="product-form">
+    <form method="POST" action="{{ url_for('admin.add_product') }}" enctype="multipart/form-data" class="product-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         
         <div class="form-row">
+            <!-- Ürün Adı -->
             <div class="form-group col-md-8">
                 <label for="name">Ürün Adı</label>
                 <input type="text" 
@@ -20,25 +21,21 @@
                        required>
             </div>
 
+            <!-- Marka Seçimi -->
             <div class="form-group col-md-4">
                 <label for="brand">Marka</label>
-                <select id="brand" name="brand_id" class="form-control" required onchange="toggleNewBrand(this.value)">
+                <select id="brand" name="brand_id" class="form-control" required>
                     <option value="">Marka Seçin</option>
                     {% for brand in brands %}
                     <option value="{{ brand.id }}" {% if product and product.brand_id == brand.id %}selected{% endif %}>
                         {{ brand.name }}
                     </option>
                     {% endfor %}
-                    <option value="new">+ Yeni Marka Ekle</option>
                 </select>
             </div>
         </div>
-
-        <div id="newBrandField" class="form-group" style="display: none;">
-            <label for="new_brand_name">Yeni Marka Adı</label>
-            <input type="text" id="new_brand_name" name="new_brand_name" class="form-control">
-        </div>
-
+        
+        <!-- Kategori Seçimi -->
         <div class="form-group">
             <label for="category">Kategori</label>
             <select id="category" name="category_id" class="form-control" required>
@@ -51,6 +48,7 @@
             </select>
         </div>
 
+        <!-- Fiyat, Stok ve Stok Kodu -->
         <div class="form-row">
             <div class="form-group col-md-4">
                 <label for="price">Fiyat (TL)</label>
@@ -85,6 +83,7 @@
             </div>
         </div>
 
+        <!-- Ürün Açıklaması -->
         <div class="form-group">
             <label for="description">Ürün Açıklaması</label>
             <textarea id="description" 
@@ -94,23 +93,23 @@
                       placeholder="Ürün özelliklerini ve detaylarını buraya giriniz...">{{ product.description if product else '' }}</textarea>
         </div>
 
+        <!-- Ürün Görselleri -->
         <div class="form-group">
             <label>Ürün Görselleri (En az 1, en fazla 5 adet)</label>
             <div class="image-upload-container">
                 <input type="file" 
-                       name="images[]" 
+                       name="images" 
                        accept="image/*" 
                        class="form-control-file image-input" 
                        multiple 
-                       required 
-                       data-max-files="5">
-                <div class="image-preview-grid"></div>
+                       {% if not product %}required{% endif %}>
+                <div class="image-preview-grid mt-3"></div>
                 <small class="text-muted">
-                    * İlk yüklenen görsel ana görsel olarak kullanılacaktır.<br>
-                    * Desteklenen formatlar: JPG, PNG, JPEG<br>
-                    * Maksimum dosya boyutu: 5MB
+                    * İlk eklenen görsel ana görsel olarak kullanılacaktır.<br>
+                    * Desteklenen formatlar: JPG, PNG, JPEG
                 </small>
             </div>
+
             {% if product and product.images %}
             <div class="current-images mt-3">
                 <h6>Mevcut Görseller</h6>
@@ -133,6 +132,7 @@
             {% endif %}
         </div>
 
+        <!-- Form Butonları -->
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-save"></i>
@@ -309,66 +309,97 @@
         grid-template-columns: 1fr;
     }
 }
+.brand-selector {
+    position: relative;
+}
+
+.new-brand-form {
+    margin-top: 10px;
+}
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Yeni marka alanı toggle
-    function toggleNewBrand(value) {
-        const newBrandField = document.getElementById('newBrandField');
-        const newBrandInput = document.getElementById('new_brand_name');
-        
-        if (value === 'new') {
-            newBrandField.style.display = 'block';
-            newBrandInput.required = true;
-        } else {
-            newBrandField.style.display = 'none';
-            newBrandInput.required = false;
-        }
+    // Form submit işlemi
+    const form = document.querySelector('.product-form');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Form validasyonu
+            const name = document.getElementById('name').value.trim();
+            const brandId = document.getElementById('brand').value;
+            const categoryId = document.getElementById('category').value;
+            const price = document.getElementById('price').value;
+            const stock = document.getElementById('stock').value;
+            const images = document.querySelector('input[type="file"]').files;
+
+            // Hata kontrolü
+            let errors = [];
+
+            if (!name) errors.push('Ürün adı gerekli');
+            if (!brandId) errors.push('Marka seçimi gerekli');
+            if (!categoryId) errors.push('Kategori seçimi gerekli');
+            if (!price) errors.push('Fiyat gerekli');
+            if (!stock) errors.push('Stok adedi gerekli');
+            if (images.length === 0) errors.push('En az bir ürün görseli gerekli');
+            if (images.length > 5) errors.push('En fazla 5 görsel yükleyebilirsiniz');
+
+            if (errors.length > 0) {
+                alert(errors.join('\n'));
+                return false;
+            }
+
+            // Form geçerliyse normal submit yap
+            form.submit();
+        });
     }
 
     // Görsel önizleme
     const imageInput = document.querySelector('.image-input');
     const previewGrid = document.querySelector('.image-preview-grid');
     
-    imageInput.addEventListener('change', function(e) {
-        previewGrid.innerHTML = '';
-        
-        if (this.files.length > 5) {
-            alert('En fazla 5 görsel yükleyebilirsiniz!');
-            this.value = '';
-            return;
-        }
-        
-        Array.from(this.files).forEach((file, index) => {
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const div = document.createElement('div');
-                    div.className = 'preview-item';
-                    div.innerHTML = `
-                        <img src="${e.target.result}" alt="Önizleme">
-                        ${index === 0 ? '<span class="badge badge-primary">Ana Görsel</span>' : ''}
-                    `;
-                    previewGrid.appendChild(div);
-                }
-                reader.readAsDataURL(file);
+    if (imageInput && previewGrid) {
+        imageInput.addEventListener('change', function(e) {
+            previewGrid.innerHTML = '';
+            
+            if (this.files.length > 5) {
+                alert('En fazla 5 görsel yükleyebilirsiniz!');
+                this.value = '';
+                return;
             }
+            
+            Array.from(this.files).forEach((file, index) => {
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'preview-item';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" alt="Önizleme">
+                            ${index === 0 ? '<span class="badge badge-primary">Ana Görsel</span>' : ''}
+                        `;
+                        previewGrid.appendChild(div);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
         });
-    });
+    }
 
     // Görsel silme işlemi
-    document.querySelectorAll('.delete-image').forEach(button => {
+    const deleteButtons = document.querySelectorAll('.delete-image');
+    deleteButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             if (confirm('Bu görseli silmek istediğinizden emin misiniz?')) {
                 const imageId = this.dataset.imageId;
-                // AJAX ile silme işlemi
                 fetch(`/admin/products/delete-image/${imageId}`, {
                     method: 'POST',
                     headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrf_token]').value
+                        'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
                     }
                 })
                 .then(response => response.json())
@@ -386,6 +417,51 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+   
+   if (imageInput && previewGrid) {
+       imageInput.addEventListener('change', function(e) {
+           previewGrid.innerHTML = '';
+           
+           if (this.files.length > 5) {
+               alert('En fazla 5 görsel yükleyebilirsiniz!');
+               this.value = '';
+               return;
+           }
+           
+           Array.from(this.files).forEach((file, index) => {
+               if (file) {
+                   const reader = new FileReader();
+                   reader.onload = function(e) {
+                       const div = document.createElement('div');
+                       div.className = 'preview-item';
+                       div.innerHTML = `
+                           <img src="${e.target.result}" alt="Önizleme">
+                           ${index === 0 ? '<span class="badge badge-primary">Ana Görsel</span>' : ''}
+                       `;
+                       previewGrid.appendChild(div);
+                   }
+                   reader.readAsDataURL(file);
+               }
+           });
+       });
+   }
+
+   // CSRF token için request başlıklarını ayarla
+   const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+   if (csrfToken) {
+       document.querySelectorAll('form').forEach(form => {
+           form.addEventListener('submit', function(e) {
+               if (!this.method || this.method.toLowerCase() === 'post') {
+                   const input = document.createElement('input');
+                   input.type = 'hidden';
+                   input.name = 'csrf_token';
+                   input.value = csrfToken;
+                   this.appendChild(input);
+               }
+           });
+       });
+   }
 });
 </script>
 {% endblock %}

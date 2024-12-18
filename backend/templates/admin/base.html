@@ -32,6 +32,12 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ url_for('admin.brands') }}" {% if request.endpoint == 'admin.brands' %}class="active"{% endif %}>
+                            <i class="fas fa-tags"></i>
+                            <span>Markalar</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ url_for('admin.orders') }}" {% if request.endpoint == 'admin.orders' %}class="active"{% endif %}>
                             <i class="fas fa-ship"></i>
                             <span>Siparişler</span>

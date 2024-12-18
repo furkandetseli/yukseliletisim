@@ -2,22 +2,29 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
 import os
-
+from flask_wtf.csrf import CSRFProtect
 from extensions import db, login_manager, migrate, csrf
 from models import * 
 
 def create_app():
     app = Flask(__name__)
+    app.config['SECRET_KEY'] = 'your-secret-key-here'  # Güvenli bir anahtar kullanın
+    app.config['WTF_CSRF_ENABLED'] = True
+    app.config['WTF_CSRF_SECRET_KEY'] = 'your-csrf-secret-key-here'  # Güvenli bir anahtar kullanın
     
-    # Yapılandırma
+    csrf = CSRFProtect(app)
+    # Yapılandırma - Upload klasörü ayarları
     basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static', 'images', 'products')
+    
+    # Max content length ayarı
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 
+
     db_path = os.path.join(basedir, 'database', 'database.sqlite')
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = 'your-secret-key'
-    app.config['UPLOAD_FOLDER'] = os.path.join('static', 'images', 'products')
 
     # Initialize extensions
     db.init_app(app)
@@ -27,9 +34,9 @@ def create_app():
     
     login_manager.login_view = 'login'
 
-    @login_manager.user_loader 
+    @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id)) 
 
     with app.app_context():
         # Import routes

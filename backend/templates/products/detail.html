@@ -1,116 +1,152 @@
-<!-- templates/products/detail.html -->
 {% extends 'base.html' %}
-
-{% block title %}{{ product.name }} - Yüksel İletişim{% endblock %}
 
 {% block content %}
 <div class="container">
+    <!-- detail.html -->
+    <nav class="breadcrumb">
+        <a href="{{ url_for('index') }}">Anasayfa</a>
+        {% if product.category_ref %}
+        <span>/</span>
+        <a href="{{ url_for('category_products', category_name=product.category_ref.name) }}">
+            {{ product.category_ref.name }}
+        </a>
+        {% endif %}
+        <span>/</span>
+        <span>{{ product.name }}</span>
+    </nav>
+
     <div class="product-detail">
-        <div class="product-images">
+        <div class="product-gallery">
             <div class="main-image">
-                <img src="{{ url_for('static', filename='images/products/' + product.image) }}" 
-                     onerror="this.src='/static/images/no-image.png'" 
-                     alt="{{ product.name }}">
+                {% if product.images and product.images[0] %}
+                    <img src="{{ url_for('static', filename='images/products/' + product.images[0].image_path) }}" 
+                         alt="{{ product.name }}" 
+                         id="mainImage">
+                {% endif %}
             </div>
-        </div>
-        
-        <div class="product-info">
-            <h1>{{ product.name }}</h1>
-            
-            <div class="product-price">
-                <span class="current-price">{{ "%.2f"|format(product.price) }} TL</span>
-            </div>
-            
-            {% if product.stock > 0 %}
-            <div class="product-stock available">
-                <i class="fas fa-check-circle"></i> Stokta Var
-            </div>
-            {% else %}
-            <div class="product-stock unavailable">
-                <i class="fas fa-times-circle"></i> Stokta Yok
+            {% if product.images|length > 1 %}
+            <div class="thumbnail-list">
+                {% for image in product.images %}
+                <div class="thumbnail{% if loop.first %} active{% endif %}" onclick="changeMainImage(this)">
+                    <img src="{{ url_for('static', filename='images/products/' + image.image_path) }}" 
+                         alt="{{ product.name }}">
+                </div>
+                {% endfor %}
             </div>
             {% endif %}
-            
-            <div class="product-description">
-                {{ product.description }}
+        </div>
+
+        <div class="product-info">
+            <h1>{{ product.name }}</h1>
+            <div class="brand">
+                {% if product.brand %}
+                <span>Marka: {{ product.brand.name }}</span>
+                {% endif %}
+                <span class="stock-code">Stok Kodu: {{ product.stock_code }}</span>
             </div>
-            
+
+            <div class="price-section">
+                <div class="price">{{ "%.2f"|format(product.price) }} TL</div>
+                {% if product.stock > 0 %}
+                    <div class="stock-status available">
+                        <i class="fas fa-check-circle"></i> Stokta Var
+                    </div>
+                {% else %}
+                    <div class="stock-status unavailable">
+                        <i class="fas fa-times-circle"></i> Stokta Yok
+                    </div>
+                {% endif %}
+            </div>
+
             {% if product.stock > 0 %}
             <div class="add-to-cart-section">
                 <div class="quantity-selector">
-                    <button class="quantity-btn minus">-</button>
-                    <input type="number" value="1" min="1" max="{{ product.stock }}" id="quantity">
-                    <button class="quantity-btn plus">+</button>
+                    <button class="quantity-btn minus" onclick="updateQuantity(-1)">-</button>
+                    <input type="number" id="quantity" value="1" min="1" max="{{ product.stock }}">
+                    <button class="quantity-btn plus" onclick="updateQuantity(1)">+</button>
                 </div>
-                
-                <button class="btn btn-primary add-to-cart" 
-                    onclick="addToCart('{{ product.id }}', document.getElementById('quantity').value)">
+                <button onclick="addToCart('{{ product.id }}')" class="btn btn-primary add-to-cart">
                     <i class="fas fa-shopping-cart"></i> Sepete Ekle
                 </button>
             </div>
             {% endif %}
-            
-            <div class="product-meta">
-                <div class="meta-item">
-                    <span class="label">Kategori:</span>
-                    <a href="{{ url_for('category_products', category_name=product.category) }}">
-                        {{ product.category }}
-                    </a>
-                </div>
+
+            <div class="product-description">
+                <h2>Ürün Açıklaması</h2>
+                {{ product.description|safe }}
             </div>
         </div>
     </div>
-    
+
     {% if related_products %}
-    <div class="related-products">
+    <section class="related-products">
         <h2>Benzer Ürünler</h2>
         <div class="product-grid">
             {% for related in related_products %}
-            {% if related.id != product.id %}
-            <div class="product-card">
-                <a href="{{ url_for('product_detail', product_id=related.id) }}" class="product-link">
-                    <div class="product-image">
-                        <img src="{{ url_for('static', filename='images/products/' + related.image) }}"
-                             onerror="this.src='/static/images/no-image.png'"
-                             alt="{{ related.name }}">
+                {% if related.id != product.id %}
+                    <div class="product-card">
+                        <a href="{{ url_for('product_detail', slug=related.slug) }}" class="product-link">
+                            <!-- Ürün kartı içeriği buraya -->
+                        </a>
                     </div>
-                    <div class="product-info">
-                        <h3>{{ related.name }}</h3>
-                        <div class="price">{{ "%.2f"|format(related.price) }} TL</div>
-                    </div>
-                </a>
-            </div>
-            {% endif %}
+                {% endif %}
             {% endfor %}
         </div>
-    </div>
+    </section>
     {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const quantityInput = document.getElementById('quantity');
-    const minusBtn = document.querySelector('.quantity-btn.minus');
-    const plusBtn = document.querySelector('.quantity-btn.plus');
-    
-    if (minusBtn && plusBtn && quantityInput) {
-        minusBtn.addEventListener('click', () => {
-            const currentValue = parseInt(quantityInput.value);
-            if (currentValue > 1) {
-                quantityInput.value = currentValue - 1;
-            }
-        });
+    function changeMainImage(thumbnail) {
+        // Tüm thumbnail'lerden active sınıfını kaldır
+        document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
         
-        plusBtn.addEventListener('click', () => {
-            const currentValue = parseInt(quantityInput.value);
-            const maxValue = parseInt(quantityInput.getAttribute('max'));
-            if (currentValue < maxValue) {
-                quantityInput.value = currentValue + 1;
+        // Tıklanan thumbnail'e active sınıfını ekle
+        thumbnail.classList.add('active');
+        
+        // Ana görseli değiştir
+        const mainImage = document.getElementById('mainImage');
+        mainImage.src = thumbnail.querySelector('img').src;
+    }
+    
+    function updateQuantity(change) {
+        const input = document.getElementById('quantity');
+        const currentStock = parseInt("{{ product.stock }}");
+        let value = parseInt(input.value) + change;
+        value = Math.max(1, Math.min(value, currentStock));
+        input.value = value;
+    }
+    
+    function addToCart(productId) {
+        const quantity = document.getElementById('quantity').value;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        
+        fetch(`/cart/add/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ quantity: quantity })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) {
+                    cartCount.textContent = data.cart_count;
+                }
+                alert('Ürün sepete eklendi!');
+            } else {
+                alert('Bir hata oluştu!');
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
         });
     }
-});
-</script>
+    </script>
 {% endblock %}

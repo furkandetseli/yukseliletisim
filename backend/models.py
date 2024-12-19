@@ -6,6 +6,7 @@ from datetime import datetime
 import random
 import string
 from sqlalchemy.orm import validates
+from slugify import slugify  # Başa ekleyin
 
 
 class User(UserMixin, db.Model):
@@ -95,19 +96,19 @@ class Category(db.Model):
     def get_tree():
         return Category.query.filter_by(parent_id=None).all()
 
-    # ürünekleme
-class Brand(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    products = db.relationship('Product', backref='brand', lazy=True)
-
 class ProductImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     image_path = db.Column(db.String(200), nullable=False)
     is_primary = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Brand(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Brand'den Product'a olan ilişki
+    products = db.relationship('Product', back_populates='brand', lazy=True)
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -119,17 +120,27 @@ class Product(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     stock = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    slug = db.Column(db.String(200), unique=True, 
+                    name='uq_product_slug')  # unique constraint için isim verdik
+    
+    # İlişkiler
+    brand = db.relationship('Brand', back_populates='products')
+    category_ref = db.relationship('Category', backref='products')
     images = db.relationship('ProductImage', backref='product', lazy=True, cascade='all, delete-orphan')
+
+    def __init__(self, *args, **kwargs):
+        if 'slug' not in kwargs:
+            kwargs['slug'] = slugify(kwargs.get('name', ''))
+        super(Product, self).__init__(*args, **kwargs)
+
     def generate_stock_code(self):
         while True:
-            # 8 karakter uzunluğunda rastgele bir kod oluştur
             code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
-            # Veritabanında mevcut olup olmadığını kontrol et
             if not Product.query.filter_by(stock_code=code).first():
                 return code
-    
-@validates('stock_code')
-def validate_stock_code(self, key, stock_code):
-    if not stock_code:
-        return self.generate_stock_code()
-    return stock_code
+
+    @validates('stock_code')
+    def validate_stock_code(self, key, stock_code):
+        if not stock_code:
+            return self.generate_stock_code()
+        return stock_code

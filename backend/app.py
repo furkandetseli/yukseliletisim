@@ -49,19 +49,29 @@ def create_app():
     # Routes
     @app.route('/')
     def index():
-        # Ana kategorileri al (parent_id'si None olanlar)
+        # Ana sayfa route'u
         categories = Category.query.filter_by(parent_id=None).order_by(Category.order.asc()).all()
-        
-        # Rastgele 8 ürün al
         featured_products = Product.query.order_by(db.func.random()).limit(8).all()
-        
-        # En son eklenen 8 ürün
         new_products = Product.query.order_by(Product.created_at.desc()).limit(8).all()
         
         return render_template('index.html', 
                             categories=categories,
                             featured_products=featured_products,
                             new_products=new_products)
+
+    @app.route('/product/<slug>')
+    def product_detail(slug):
+        product = Product.query.filter_by(slug=slug).first_or_404()
+        related_products = []
+        if product.category_id:
+            related_products = Product.query.filter(
+                Product.category_id == product.category_id,
+                Product.id != product.id
+            ).limit(4).all()
+        
+        return render_template('products/detail.html', 
+                            product=product, 
+                            related_products=related_products)
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
@@ -221,36 +231,47 @@ def create_app():
         
         return jsonify({'message': 'Ürün sepetten kaldırıldı'})
 
-    @app.route('/product/<int:product_id>')
-    def product_detail(product_id):
-        product = Product.query.get_or_404(product_id)
-        related_products = Product.query.filter_by(category=product.category).limit(4).all()
-        return render_template('products/detail.html', 
-                             product=product, 
-                             related_products=related_products)
-
     @app.route('/category/<string:category_name>')
     def category_products(category_name):
         page = request.args.get('page', 1, type=int)
         sort = request.args.get('sort', 'default')
         
-        if sort == 'price_asc':
-            order = Product.price.asc()
-        elif sort == 'price_desc':
-            order = Product.price.desc()
-        elif sort == 'newest':
-            order = Product.created_at.desc()
-        else:
-            order = Product.name.asc()
+        # Hem ana kategori hem alt kategori kontrolü
+        category = Category.query.filter_by(name=category_name).first_or_404()
         
-        products = Product.query.filter_by(category=category_name)\
-            .order_by(order)\
-            .paginate(page=page, per_page=12)
+        # Bu kategoriye ait ve alt kategorilere ait tüm ürünleri al
+        query = Product.query
+        
+        if category.children.count() > 0:
+            # Ana kategori ise, kendi ve alt kategorilerindeki ürünleri al
+            subcategory_ids = [c.id for c in category.children]
+            query = query.filter(
+                db.or_(
+                    Product.category_id == category.id,
+                    Product.category_id.in_(subcategory_ids)
+                )
+            )
+        else:
+            # Alt kategori ise sadece kendi ürünlerini al
+            query = query.filter_by(category_id=category.id)
+        
+        # Sıralama
+        if sort == 'price_asc':
+            query = query.order_by(Product.price.asc())
+        elif sort == 'price_desc':
+            query = query.order_by(Product.price.desc())
+        elif sort == 'newest':
+            query = query.order_by(Product.created_at.desc())
+        else:
+            query = query.order_by(Product.name.asc())
+        
+        # Sayfalama
+        products = query.paginate(page=page, per_page=12)
         
         return render_template('products/category.html', 
-                             products=products,
-                             category=category_name,
-                             current_sort=sort)
+                            products=products,
+                            category=category,
+                            current_sort=sort)
 
     @app.route('/search')
     def search():

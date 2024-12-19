@@ -411,24 +411,6 @@ body {
     background: #f0f0f0;
 }
 
-.menu-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s;
-    z-index: 1500;
-    backdrop-filter: blur(2px);
-}
-
-.menu-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
 
 /* Footer */
 footer {
@@ -817,4 +799,300 @@ footer {
 
 .modal.active {
     display: flex;
+}
+
+/* Reset any previous backdrop filters */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    z-index: 1000; /* z-index değerini düşürdük */
+    backdrop-filter: blur(2px);
+}
+
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    z-index: 2000; /* Mobile menu'nün z-index değerini yükselttik */
+    overflow-y: auto;
+}
+
+/* Mobile menü içindeki linklerin tıklanabilirliğini artırmak için */
+.mobile-menu a {
+    position: relative;
+    z-index: 2001; /* Link'lerin z-index değerini en üste çıkardık */
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+}
+
+/* Toggle butonlarının tıklanabilirliğini artırmak için */
+.toggle-submenu {
+    position: relative;
+    z-index: 2001;
+    background: none;
+    border: none;
+    padding: 12px;
+    cursor: pointer;
+}
+
+@media (min-width: 576px) {
+    .mobile-menu {
+        max-width: 380px;
+    }
+}
+
+.mobile-menu.active {
+    right: 0;
+}
+
+.mobile-menu-header {
+    position: sticky;
+    top: 0;
+    background: var(--primary-color);
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 2;
+}
+
+.mobile-menu-content {
+    padding-bottom: 60px; /* Add space at bottom */
+}
+
+.mobile-nav-item {
+    border-bottom: 1px solid #eee;
+}
+
+.mobile-nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+}
+
+.mobile-nav-header a {
+    flex: 1;
+    padding: 8px 0;
+    color: #333;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.toggle-submenu {
+    padding: 8px;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+}
+
+.mobile-submenu {
+    display: none;
+    background: #f8f9fa;
+}
+
+.mobile-submenu.active {
+    display: block;
+}
+
+.mobile-submenu a {
+    display: block;
+    padding: 12px 20px;
+    color: #666;
+    text-decoration: none;
+    border-top: 1px solid #eee;
+}
+
+/* Fix for iOS momentum scrolling */
+.mobile-menu-content {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    height: calc(100% - 60px); /* Subtract header height */
+}
+
+/* Prevent background scroll when menu is open */
+body.menu-open {
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+}
+
+/* Responsive navigation toggle */
+.mobile-nav-toggle {
+    display: none;
+    padding: 10px;
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+@media (max-width: 991px) {
+    .mobile-nav-toggle {
+        display: block;
+    }
+    
+    .nav-list {
+        display: none;
+    }
+}
+
+/* Enhanced touch targets */
+.mobile-nav-header a,
+.mobile-submenu a,
+.toggle-submenu,
+.close-menu {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+
+/* Active state styles */
+.mobile-nav-item.active > .mobile-nav-header {
+    background: #f8f9fa;
+}
+
+/* Temel boyutlandırmalar için viewport unit'leri kullanalım */
+.logo img {
+    height: 40px; /* Sabit yerine dinamik */
+    max-height: 8vw; /* Viewport genişliğine göre maksimum yükseklik */
+}
+
+/* Ana header için responsive ayarlar */
+.main-header {
+    padding: clamp(10px, 2vw, 20px) 0; /* Min 10px, max 20px, viewport'a göre ölçeklenen padding */
+}
+
+.main-header .container {
+    gap: clamp(10px, 3vw, 40px); /* Dinamik gap */
+}
+
+/* Search container için responsive düzenleme */
+.search-container {
+    flex: 1;
+    max-width: clamp(200px, 50vw, 600px); /* Minimum 200px, maksimum 600px, viewport'a göre ölçeklenen genişlik */
+}
+
+.search-input {
+    padding: clamp(8px, 1.5vw, 12px) clamp(10px, 2vw, 20px);
+    font-size: clamp(14px, 1.5vw, 16px);
+}
+
+/* User menu için responsive ayarlar */
+.user-menu {
+    gap: clamp(10px, 2vw, 20px);
+}
+
+.menu-item i {
+    font-size: clamp(16px, 2vw, 20px);
+}
+
+/* Mobil menü için responsive düzenlemeler */
+.mobile-menu {
+    width: clamp(250px, 80vw, 300px); /* Minimum 250px, maksimum 300px */
+}
+
+.mobile-menu-header {
+    padding: clamp(12px, 2vw, 20px);
+}
+
+.mobile-nav-header {
+    padding: clamp(10px, 1.5vw, 15px);
+}
+
+/* Footer responsive düzenlemeler */
+.footer-content {
+    gap: clamp(20px, 3vw, 40px);
+}
+
+/* Media queries ile daha detaylı kontrol */
+@media (max-width: 1200px) {
+    .container {
+        padding: 0 clamp(10px, 2vw, 20px);
+    }
+}
+
+@media (max-width: 992px) {
+    .main-header .container {
+        padding: clamp(8px, 1.5vw, 15px);
+    }
+    
+    .nav-link {
+        padding: clamp(8px, 1.2vw, 10px) clamp(12px, 1.5vw, 20px);
+        font-size: clamp(13px, 1.3vw, 15px);
+    }
+}
+
+@media (max-width: 768px) {
+    .header-menu {
+        display: none;
+    }
+
+    .main-header .container {
+        flex-wrap: wrap;
+    }
+
+    .search-container {
+        order: 3;
+        max-width: 100%;
+        margin-top: clamp(8px, 1.5vw, 15px);
+    }
+
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr); /* 4 sütun yerine 2 sütun */
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-content {
+        grid-template-columns: 1fr; /* Tek sütun */
+    }
+    
+    .user-menu {
+        gap: clamp(8px, 1.5vw, 15px);
+    }
+    
+    .cart-count {
+        font-size: clamp(10px, 1.2vw, 12px);
+        padding: clamp(1px, 0.5vw, 2px) clamp(4px, 1vw, 6px);
+    }
+}
+
+/* Float butonlar için responsive ayarlar */
+.whatsapp-float,
+.live-chat-float {
+    bottom: clamp(20px, 4vw, 40px);
+    right: clamp(10px, 2vw, 20px);
+}
+
+.whatsapp-float a {
+    width: clamp(40px, 8vw, 60px);
+    height: clamp(40px, 8vw, 60px);
+    font-size: clamp(20px, 4vw, 30px);
+}
+
+#liveChatButton {
+    padding: clamp(8px, 1.5vw, 12px) clamp(15px, 2vw, 20px);
+    font-size: clamp(14px, 1.5vw, 16px);
+}
+
+/* Announcement bar responsive */
+.announcement-bar {
+    padding: clamp(8px, 1.2vw, 10px);
+    font-size: clamp(12px, 1.3vw, 14px);
 }

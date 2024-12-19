@@ -8,6 +8,7 @@
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/product.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -108,15 +109,17 @@
     <nav class="main-nav">
         <div class="container">
             <div class="nav-wrapper">
+                <!-- Mobil Menu Butonu -->
                 <div class="mobile-nav-toggle">
                     <button id="menuToggle">
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
                 
+                <!-- Ana Menu -->
                 <ul class="nav-list">
                     {% for category in categories %}
-                    <li class="nav-item {% if category.children.count() > 0 %}has-dropdown{% endif %}">
+                    <li class="nav-item{% if category.children.count() > 0 %} has-dropdown{% endif %}">
                         <a href="{{ url_for('category_products', category_name=category.name) }}" class="nav-link">
                             {{ category.name }}
                             {% if category.children.count() > 0 %}
@@ -126,15 +129,14 @@
                         {% if category.children.count() > 0 %}
                         <div class="mega-menu">
                             <div class="mega-menu-content">
-                                <div class="menu-header">
-                                    <h3>{{ category.name }}</h3>
-                                </div>
                                 <div class="menu-grid">
                                     {% for subcategory in category.children %}
-                                    <div class="mega-menu-column">
-                                        <div class="column-header">
-                                            <h4>{{ subcategory.name }}</h4>
-                                        </div>
+                                    <div class="menu-column">
+                                        <h4>
+                                            <a href="{{ url_for('category_products', category_name=subcategory.name) }}">
+                                                {{ subcategory.name }}
+                                            </a>
+                                        </h4>
                                         {% if subcategory.children.count() > 0 %}
                                         <ul>
                                             {% for sub_sub in subcategory.children %}
@@ -156,8 +158,65 @@
                     {% endfor %}
                 </ul>
             </div>
+     
+            <!-- Mobil Menu -->
+            <div class="mobile-menu" id="mobileMenu">
+                <div class="mobile-menu-header">
+                    <h3>Kategoriler</h3>
+                    <button class="close-menu">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="mobile-menu-content">
+                    <ul class="mobile-nav-list">
+                        {% for category in categories %}
+                        <li class="mobile-nav-item">
+                            <div class="mobile-nav-header">
+                                <a href="{{ url_for('category_products', category_name=category.name) }}">
+                                    {{ category.name }}
+                                </a>
+                                {% if category.children.count() > 0 %}
+                                <button class="toggle-submenu">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% if category.children.count() > 0 %}
+                            <ul class="mobile-submenu">
+                                {% for subcategory in category.children %}
+                                <li>
+                                    <div class="submenu-header">
+                                        <a href="{{ url_for('category_products', category_name=subcategory.name) }}">
+                                            {{ subcategory.name }}
+                                        </a>
+                                        {% if subcategory.children.count() > 0 %}
+                                        <button class="toggle-submenu">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                    {% if subcategory.children.count() > 0 %}
+                                    <ul class="mobile-submenu-l2">
+                                        {% for sub_sub in subcategory.children %}
+                                        <li>
+                                            <a href="{{ url_for('category_products', category_name=sub_sub.name) }}">
+                                                {{ sub_sub.name }}
+                                            </a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
         </div>
-    </nav>
+     </nav>
 
     <!-- Mobil Menü -->
     <div class="mobile-menu" id="mobileMenu">

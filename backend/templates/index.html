@@ -76,8 +76,7 @@
                         </div>
 
                         {% if product.stock > 0 %}
-                            <button onclick="event.preventDefault(); addToCart('{{ product.id }}')" 
-                                    class="add-to-cart-btn">
+                            <button class="add-to-cart-btn" data-product-id="{{ product.id }}">
                                 <i class="fas fa-shopping-cart"></i>
                                 Sepete Ekle
                             </button>
@@ -140,8 +139,7 @@
                         </div>
 
                         {% if product.stock > 0 %}
-                            <button onclick="event.preventDefault(); addToCart('{{ product.id }}')" 
-                                    class="add-to-cart-btn">
+                            <button class="add-to-cart-btn" data-product-id="{{ product.id }}">
                                 <i class="fas fa-shopping-cart"></i>
                                 Sepete Ekle
                             </button>

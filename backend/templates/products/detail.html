@@ -65,8 +65,9 @@
                     <input type="number" id="quantity" value="1" min="1" max="{{ product.stock }}">
                     <button class="quantity-btn plus" onclick="updateQuantity(1)">+</button>
                 </div>
-                <button onclick="addToCart('{{ product.id }}')" class="btn btn-primary add-to-cart">
-                    <i class="fas fa-shopping-cart"></i> Sepete Ekle
+                <button type="button" class="add-to-cart-btn" data-product-id="{{ product.id }}">
+                    <i class="fas fa-shopping-cart"></i>
+                    Sepete Ekle
                 </button>
             </div>
             {% endif %}

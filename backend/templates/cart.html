@@ -59,8 +59,8 @@
                                        class="quantity-input" 
                                        value="{{ item.quantity }}" 
                                        min="1" 
-                                       max="{{ item.product.stock }}"
-                                       readonly>
+                                       max="99"
+                                       data-price="{{ item.product.price }}">
                                 <button type="button" class="quantity-btn plus">
                                     <i class="fas fa-plus"></i>
                                 </button>

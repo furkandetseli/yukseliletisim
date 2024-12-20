@@ -67,18 +67,21 @@
     display: flex;
     align-items: center;
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
+    width: fit-content;
 }
 
 .quantity-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border: none;
     background: #f8f9fa;
     color: #333;
-    font-size: 1.1rem;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.2s;
 }
 
@@ -86,12 +89,19 @@
     background: #e9ecef;
 }
 
+.quantity-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .quantity-input {
-    width: 50px;
-    height: 36px;
+    width: 45px;
+    height: 32px;
     border: none;
+    border-left: 1px solid #e0e0e0;
+    border-right: 1px solid #e0e0e0;
     text-align: center;
-    font-size: 1rem;
+    font-size: 0.95rem;
     -moz-appearance: textfield;
 }
 
@@ -99,6 +109,11 @@
 .quantity-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+
+.quantity-input:focus {
+    outline: none;
+    background: #f8f9fa;
 }
 
 .remove-item {

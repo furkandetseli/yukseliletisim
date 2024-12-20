@@ -180,63 +180,110 @@ def create_app():
         
         return render_template('cart.html', **template_data)
 
+
     @app.route('/cart/add/<int:product_id>', methods=['POST'])
     def add_to_cart(product_id):
-        product = Product.query.get_or_404(product_id)
-        quantity = int(request.form.get('quantity', 1))
-        
-        if current_user.is_authenticated:
-            cart_item = CartItem.query.filter_by(
-                user_id=current_user.id,
-                product_id=product_id
-            ).first()
+        try:
+            data = request.get_json()
+            quantity = data.get('quantity', 1)
             
-            if cart_item:
-                cart_item.quantity += quantity
-            else:
-                cart_item = CartItem(
-                    user_id=current_user.id,
-                    product_id=product_id,
-                    quantity=quantity
-                )
-                db.session.add(cart_item)
+            # Ürünü veritabanından al
+            product = Product.query.get_or_404(product_id)
+            
+            # Stok kontrolü
+            if not product:
+                return jsonify({
+                    'success': False,
+                    'message': 'Ürün bulunamadı'
+                }), 404
                 
-            db.session.commit()
-        else:
-            cart = session.get('cart', {})
-            cart[str(product_id)] = cart.get(str(product_id), 0) + quantity
-            session['cart'] = cart
-        
-        return jsonify({
-            'message': 'Ürün sepete eklendi',
-            'cart_count': get_cart_count()
-        })
+            if product.stock < quantity:
+                return jsonify({
+                    'success': False,
+                    'message': 'Yetersiz stok'
+                }), 400
+            
+            # Kullanıcı giriş yapmışsa
+            if current_user.is_authenticated:
+                cart_item = CartItem.query.filter_by(
+                    user_id=current_user.id,
+                    product_id=product_id
+                ).first()
+                
+                if cart_item:
+                    cart_item.quantity += quantity
+                else:
+                    cart_item = CartItem(
+                        user_id=current_user.id,
+                        product_id=product_id,
+                        quantity=quantity
+                    )
+                    db.session.add(cart_item)
+                    
+                db.session.commit()
+                
+            # Kullanıcı giriş yapmamışsa
+            else:
+                cart = session.get('cart', {})
+                product_id_str = str(product_id)
+                cart[product_id_str] = cart.get(product_id_str, 0) + quantity
+                session['cart'] = cart
+                session.modified = True
+            
+            # Sepet sayısını al
+            cart_count = get_cart_count()
+            
+            return jsonify({
+                'success': True,
+                'message': 'Ürün sepete eklendi',
+                'cart_count': cart_count
+            })
+            
+        except Exception as e:
+            print(f"Error in add_to_cart: {str(e)}")  # Debug için log
+            return jsonify({
+                'success': False,
+                'message': 'Bir hata oluştu'
+            }), 500
 
+    # Helper function
+    def get_cart_count():
+        if current_user.is_authenticated:
+            return CartItem.query.filter_by(user_id=current_user.id).count()
+        return len(session.get('cart', {}))
+    
     @app.route('/cart/update/<int:product_id>', methods=['POST'])
     def update_cart(product_id):
-        quantity = int(request.form.get('quantity', 1))
-        
-        if current_user.is_authenticated:
-            cart_item = CartItem.query.filter_by(
-                user_id=current_user.id,
-                product_id=product_id
-            ).first_or_404()
+        try:
+            data = request.get_json()
+            quantity = int(data.get('quantity', 1))
             
-            if quantity > 0:
-                cart_item.quantity = quantity
-            else:
-                db.session.delete(cart_item)
+            if current_user.is_authenticated:
+                cart_item = CartItem.query.filter_by(
+                    user_id=current_user.id,
+                    product_id=product_id
+                ).first_or_404()
                 
-            db.session.commit()
-        else:
-            cart = session.get('cart', {})
-            if quantity > 0:
-                cart[str(product_id)] = quantity
+                cart_item.quantity = quantity
+                db.session.commit()
             else:
-                cart.pop(str(product_id), None)
-            session['cart'] = cart
-        
-        return jsonify({'message': 'Sepet güncellendi'})
+                cart = session.get('cart', {})
+                cart[str(product_id)] = quantity
+                session['cart'] = cart
+                session.modified = True
+            
+            return jsonify({
+                'success': True,
+                'message': 'Sepet güncellendi'
+            })
+            
+        except Exception as e:
+            print(f"Error updating cart: {str(e)}") # Debug için log ekleyin
+            db.session.rollback()
+            return jsonify({
+                'success': False,
+                'message': str(e)
+            }), 500
 
     @app.route('/cart/remove/<int:product_id>', methods=['POST'])
     def remove_from_cart(product_id):

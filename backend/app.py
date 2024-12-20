@@ -136,11 +136,11 @@ def create_app():
     @app.route('/cart')
     def cart():
         cart_items = []
-        total = 0
+        subtotal = 0
         
         if current_user.is_authenticated:
             cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
-            total = sum(item.product.price * item.quantity for item in cart_items)
+            subtotal = sum(item.product.price * item.quantity for item in cart_items)
         else:
             cart = session.get('cart', {})
             for product_id, quantity in cart.items():
@@ -150,11 +150,35 @@ def create_app():
                         'product': product,
                         'quantity': quantity
                     })
-                    total += product.price * quantity
+                    subtotal += product.price * quantity
+
+        # Kargo ücreti hesaplama
+        shipping_cost = 0 if subtotal >= 1000 else 29.90
         
-        return render_template('cart/cart.html', 
-                             cart_items=cart_items,
-                             total=total)
+        # Toplam tutar hesaplama
+        total = subtotal + shipping_cost
+        
+        # Progress bar yüzdesi hesaplama
+        try:
+            progress_percentage = min(100, int((subtotal / 1000) * 100))
+        except (ZeroDivisionError, ValueError):
+            progress_percentage = 0
+        
+        # Bedava kargo için kalan tutar
+        remaining_for_free_shipping = max(0, 1000 - subtotal)
+        
+        # Template'e gönderilecek veriler
+        template_data = {
+            'cart_items': cart_items,
+            'subtotal': subtotal,
+            'shipping_cost': shipping_cost,
+            'total': total,
+            'progress_percentage': progress_percentage,
+            'remaining_for_free_shipping': remaining_for_free_shipping,
+            'show_free_shipping_progress': subtotal < 1000,  # Progress bar'ın gösterilip gösterilmeyeceği
+        }
+        
+        return render_template('cart.html', **template_data)
 
     @app.route('/cart/add/<int:product_id>', methods=['POST'])
     def add_to_cart(product_id):

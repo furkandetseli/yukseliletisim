@@ -16,7 +16,6 @@
             <a href="/link3" class="slide">
                 <img src="/static/images/slider/slide3.jpg" alt="Slider Image 3">
             </a>
-            <!-- Daha fazla görsel buraya eklenebilir -->
         </div>
 
         <!-- Slider Noktaları -->
@@ -24,7 +23,6 @@
             <span class="dot active"></span>
             <span class="dot"></span>
             <span class="dot"></span>
-            <!-- Her görsel için bir nokta eklenir -->
         </div>
 
         <!-- Slider Okları -->
@@ -41,7 +39,7 @@
             <a href="{{ url_for('admin.products') }}" class="view-all">Tümünü Gör</a>
         </div>
         <div class="product-grid">
-            {% for product in new_products %}
+            {% for product in featured_products %}
             <div class="product-card">
                 <a href="{{ url_for('product_detail', slug=product.slug) }}" class="product-link">
                     <div class="product-image">
@@ -54,16 +52,40 @@
                                 <i class="fas fa-image"></i>
                             </div>
                         {% endif %}
+                        
+                        {% if product.stock == 0 %}
+                            <div class="stock-badge out">Stokta Yok</div>
+                        {% elif product.stock <= 5 %}
+                            <div class="stock-badge limited">Sınırlı Stok</div>
+                        {% endif %}
                     </div>
+
                     <div class="product-info">
-                        <h3>{{ product.name }}</h3>
-                        <div class="price">{{ "%.2f"|format(product.price) }} TL</div>
+                        {% if product.brand %}
+                            <div class="brand">{{ product.brand.name }}</div>
+                        {% endif %}
+                        
+                        <div class="product-title">{{ product.name }}</div>
+                        
+                        <div class="price-container">
+                            {% if product.old_price and product.old_price > product.price %}
+                                <div class="old-price">{{ "%.2f"|format(product.old_price) }} TL</div>
+                                <div class="discount">-%{{ ((product.old_price - product.price) / product.old_price * 100)|round|int }}</div>
+                            {% endif %}
+                            <div class="current-price">{{ "%.2f"|format(product.price) }} TL</div>
+                        </div>
+
                         {% if product.stock > 0 %}
-                            <button onclick="event.preventDefault(); addToCart('{{ product.id }}')" class="btn btn-primary add-to-cart">
-                                <i class="fas fa-shopping-cart"></i> Sepete Ekle
+                            <button onclick="event.preventDefault(); addToCart('{{ product.id }}')" 
+                                    class="add-to-cart-btn">
+                                <i class="fas fa-shopping-cart"></i>
+                                Sepete Ekle
                             </button>
                         {% else %}
-                            <button class="btn btn-secondary" disabled>Stokta Yok</button>
+                            <button class="add-to-cart-btn disabled" disabled>
+                                <i class="fas fa-times"></i>
+                                Stokta Yok
+                            </button>
                         {% endif %}
                     </div>
                 </a>
@@ -94,16 +116,40 @@
                                 <i class="fas fa-image"></i>
                             </div>
                         {% endif %}
+                        
+                        {% if product.stock == 0 %}
+                            <div class="stock-badge out">Stokta Yok</div>
+                        {% elif product.stock <= 5 %}
+                            <div class="stock-badge limited">Sınırlı Stok</div>
+                        {% endif %}
                     </div>
+
                     <div class="product-info">
-                        <h3>{{ product.name }}</h3>
-                        <div class="price">{{ "%.2f"|format(product.price) }} TL</div>
+                        {% if product.brand %}
+                            <div class="brand">{{ product.brand.name }}</div>
+                        {% endif %}
+                        
+                        <div class="product-title">{{ product.name }}</div>
+                        
+                        <div class="price-container">
+                            {% if product.old_price and product.old_price > product.price %}
+                                <div class="old-price">{{ "%.2f"|format(product.old_price) }} TL</div>
+                                <div class="discount">-%{{ ((product.old_price - product.price) / product.old_price * 100)|round|int }}</div>
+                            {% endif %}
+                            <div class="current-price">{{ "%.2f"|format(product.price) }} TL</div>
+                        </div>
+
                         {% if product.stock > 0 %}
-                            <button onclick="event.preventDefault(); addToCart('{{ product.id }}')" class="btn btn-primary add-to-cart">
-                                <i class="fas fa-shopping-cart"></i> Sepete Ekle
+                            <button onclick="event.preventDefault(); addToCart('{{ product.id }}')" 
+                                    class="add-to-cart-btn">
+                                <i class="fas fa-shopping-cart"></i>
+                                Sepete Ekle
                             </button>
                         {% else %}
-                            <button class="btn btn-secondary" disabled>Stokta Yok</button>
+                            <button class="add-to-cart-btn disabled" disabled>
+                                <i class="fas fa-times"></i>
+                                Stokta Yok
+                            </button>
                         {% endif %}
                     </div>
                 </a>
@@ -379,219 +425,210 @@ a {
 /* Featured & New Products Sections */
 .featured-products,
 .new-products {
-    padding: 60px 0;
+    padding: 40px 0; /* 60px'ten 40px'e düşürüldü */
 }
 
 .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
-    position: relative;
+    margin-bottom: 25px; /* 40px'ten 25px'e düşürüldü */
 }
 
 .section-header::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 0;
-    width: 60px;
-    height: 4px;
-    background: #1a237e;
-    border-radius: 2px;
+    content: none; /* Alt çizgi kaldırıldı */
 }
 
 .section-header h2 {
-    font-size: 2.2rem;
+    font-size: 1.8rem; /* 2.2rem'den 1.8rem'e düşürüldü */
     font-weight: 700;
     color: #1a237e;
 }
 
-.view-all {
-    color: #1a237e;
-    text-decoration: none;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: transform 0.3s ease;
-}
-
-.view-all:hover {
-    transform: translateX(5px);
-}
-
-.view-all::after {
-    content: '→';
-    font-size: 1.2em;
-}
-
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
-    margin-bottom: 60px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* 250px'ten 220px'e düşürüldü */
+    gap: 20px; /* 25px'ten 20px'e düşürüldü */
+    margin-bottom: 30px; /* 40px'ten 30px'e düşürüldü */
 }
 
 .product-card {
     background: white;
-    border-radius: 15px;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    transition: all 0.3s ease;
-    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease;
+    height: 100%;
+    display: flex;
+    padding: 0; /* Padding kaldırıldı */
+    margin: 0; /* Margin kaldırıldı */
 }
 
 .product-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+}
+
+.product-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    padding: 0; /* Padding kaldırıldı */
+    margin: 0; /* Margin kaldırıldı */
 }
 
 .product-image {
     position: relative;
     aspect-ratio: 1;
+    background: #f8f9fa;
     overflow: hidden;
-}
-
-.product-image::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.1));
-    pointer-events: none;
+    padding: 0; /* Padding kaldırıldı */
+    margin: 0; /* Margin kaldırıldı */
 }
 
 .product-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     transition: transform 0.5s ease;
-}
-
-.product-card:hover .product-image img {
-    transform: scale(1.05);
+    padding: 0; /* Padding kaldırıldı */
+    margin: 0; /* Margin kaldırıldı */
+    display: block; /* Block element olarak ayarlandı */
 }
 
 .product-info {
-    padding: 25px;
-}
-
-.product-info h3 {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #1a237e;
-    margin-bottom: 15px;
-}
-
-.price {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1a237e;
-    margin-bottom: 20px;
+    padding: 12px 15px; /* 20px'ten düşürüldü */
     display: flex;
-    align-items: baseline;
-    gap: 8px;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 8px; /* Elementler arası boşluk için gap eklendi */
 }
 
-.price::before {
-    content: '₺';
-    font-size: 1rem;
-    color: #666;
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 12px 25px;
-    border-radius: 10px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
+.brand {
+    color: #1a237e; /* Renk değiştirildi */
+    font-size: 0.9rem;
+    font-weight: 600; /* Kalınlaştırıldı */
+    text-align: center; /* Ortalandı */
+    margin-bottom: 0; /* Margin kaldırıldı */
+    text-transform: uppercase; /* Büyük harfe çevrildi */
     letter-spacing: 0.5px;
 }
 
-.btn-primary {
+.product-title {
+    font-size: 0.95rem; /* Biraz küçültüldü */
+    color: #333;
+    line-height: 1.3;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    height: 2.6em; /* 2.8em'den düşürüldü */
+    margin: 0; /* Margin'ler kaldırıldı */
+}
+
+.price-container {
+    margin: 5px 0; /* Margin azaltıldı */
+    padding: 0; /* Padding kaldırıldı */
+}
+
+.current-price {
+    font-size: 1.3rem; /* 1.4rem'den düşürüldü */
+    font-weight: 700; /* 600'den 700'e çıkarıldı */
+    color: #1a237e;
+}
+
+.old-price {
+    color: #999;
+    text-decoration: line-through;
+    font-size: 0.85rem; /* Küçültüldü */
+    margin-right: 5px;
+}
+
+.discount {
+    display: inline-block;
+    background: #dc3545;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem; /* Küçültüldü */
+    margin-left: 5px;
+}
+
+.add-to-cart-btn {
+    width: 100%;
+    padding: 10px; /* 12px'ten düşürüldü */
+    margin-top: 8px; /* 15px'ten düşürüldü */
+    border: none;
+    border-radius: 6px;
     background: #1a237e;
     color: white;
-    border: none;
+    font-size: 0.85rem; /* Küçültüldü */
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
-.btn-primary:hover {
-    background: #283593;
-    transform: translateY(-2px);
+.stock-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: white;
 }
 
-.btn-secondary {
-    background: #e0e0e0;
-    color: #9e9e9e;
-    cursor: not-allowed;
-}
-
-.add-to-cart {
-    width: 100%;
-}
-
-/* Responsive Design */
+/* Responsive düzenlemeler */
 @media (max-width: 1200px) {
     .product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    }
-}
-
-@media (max-width: 992px) {
-    .slide-text h2 {
-        font-size: 2.8rem;
-    }
-    
-    .slide-text p {
-        font-size: 1.2rem;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
     }
 }
 
 @media (max-width: 768px) {
-    .hero-slider {
-        padding: 40px 0;
-    }
-
-    .slide-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 40px;
-    }
-
-    .slide-text h2 {
-        font-size: 2.2rem;
-    }
-
     .section-header h2 {
-        font-size: 1.8rem;
+        font-size: 1.4rem;
+    }
+    
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
     }
 
-    .product-info h3 {
+    .product-info {
+        padding: 10px;
+    }
+
+    .current-price {
         font-size: 1.1rem;
-    }
-
-    .price {
-        font-size: 1.3rem;
     }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 480px) {
     .product-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 
-    .slide-text h2 {
-        font-size: 1.8rem;
+    .product-info {
+        padding: 8px;
     }
 
-    .slide-text p {
-        font-size: 1rem;
+    .product-title {
+        font-size: 0.85rem;
+    }
+
+    .add-to-cart-btn {
+        padding: 8px;
+        font-size: 0.8rem;
     }
 }
 </style>

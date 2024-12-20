@@ -25,71 +25,191 @@ body {
     padding: 0 20px;
 }
 
-/* Top Bar */
+/* Top Bar Styles */
 .top-bar {
-    background: white;
-    border-bottom: 1px solid var(--border-color);
-    padding: 8px 0;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
 }
 
 .top-bar .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 8px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 .header-contact {
     display: flex;
+    align-items: center;
     gap: 20px;
 }
 
 .header-contact a {
-    color: var(--text-color);
+    color: #495057;
     text-decoration: none;
-    font-size: 14px;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+    transition: color 0.2s ease;
+}
+
+.header-contact a:hover {
+    color: #1a237e;
+}
+
+.header-contact i {
+    font-size: 1rem;
 }
 
 .header-menu {
     display: flex;
+    align-items: center;
     gap: 20px;
 }
 
 .header-menu a {
-    color: var(--text-color);
+    color: #495057;
     text-decoration: none;
-    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.header-menu a:hover {
+    color: #1a237e;
+    background: rgba(26, 35, 126, 0.05);
+}
+
+/* User Menu Styles */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.menu-item {
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.menu-item:hover {
+    background: rgba(26, 35, 126, 0.05);
+    color: #1a237e;
+}
+
+.menu-item i {
+    font-size: 1.2rem;
+    transition: transform 0.2s ease;
+}
+
+.menu-item:hover i {
+    transform: translateY(-2px);
+}
+
+.menu-item span {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.cart {
+    position: relative;
+    background: rgba(26, 35, 126, 0.05);
+    padding: 8px 16px;
+    border-radius: 8px;
+}
+
+.cart:hover {
+    background: rgba(26, 35, 126, 0.1);
+}
+
+.cart-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #e31837;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 /* Main Header */
 .main-header {
-    padding: 20px 0;
     background: white;
+    padding: 20px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
 .main-header .container {
     display: flex;
     align-items: center;
     gap: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 200px; /* Logo için minimum genişlik */
 }
 
 .logo img {
-    height: 50px;
+    height: 55px; /* Logo boyutu artırıldı */
+    transition: transform 0.3s ease;
+    display: block; /* Block element olarak ayarlandı */
+}
+
+.logo:hover img {
+    transform: scale(1.05);
 }
 
 .search-container {
     flex: 1;
     max-width: 600px;
+    position: relative;
 }
 
 .search-input {
     width: 100%;
     padding: 12px 20px;
-    border: 2px solid var(--border-color);
+    padding-right: 50px;
+    border: 2px solid #e9ecef;
     border-radius: 25px;
-    font-size: 16px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.search-input:focus {
+    border-color: #1a237e;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(26, 35, 126, 0.1);
+    outline: none;
 }
 
 .search-button {
@@ -99,38 +219,221 @@ body {
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: var(--primary-color);
+    color: #6c757d;
     cursor: pointer;
+    padding: 5px;
+    transition: all 0.2s ease;
 }
 
-/* User Menu */
-.user-menu {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+.search-button:hover {
+    color: #1a237e;
 }
 
-.menu-item {
-    text-decoration: none;
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
-    gap: 5px;
+/* Responsive Styles */
+@media (max-width: 1200px) {
+    .main-header .container {
+        gap: 20px;
+    }
+
+    .search-container {
+        max-width: 400px;
+    }
+
+    .menu-item span {
+        font-size: 0.85rem;
+    }
 }
 
-.cart {
-    position: relative;
+@media (max-width: 992px) {
+    .header-contact {
+        gap: 15px;
+    }
+
+    .header-contact span {
+        display: none;
+    }
+
+    .header-menu {
+        gap: 15px;
+    }
+
+    .user-menu {
+        gap: 15px;
+    }
+
+    .menu-item {
+        padding: 6px 10px;
+    }
 }
 
-.cart-count {
+@media (max-width: 768px) {
+    /* Üst bar (top-bar) gizleniyor */
+    .top-bar {
+        display: none;
+    }
+
+    /* Ana konteyner düzenlemesi */
+    .main-header .container {
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: space-between;
+        position: relative;
+        align-items: center;
+    }
+
+    /* Logo düzenlemesi */
+    .logo {
+        flex: 1;
+        min-width: 150px; /* Minimum genişlik */
+    }
+
+    .logo img {
+        height: 60px; /* Logo yüksekliği artırıldı */
+        display: block;
+        margin: 0 auto;
+    }
+
+    /* Navigasyon butonu sağ üst */
+    .nav-toggle {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        background: none;
+        border: none;
+        color: #333;
+        font-size: 1.5rem;
+        cursor: pointer;
+        z-index: 1001;
+    }
+
+    .nav-toggle:hover {
+        color: #1a237e;
+    }
+
+    /* Arama butonu aşağı alındı */
+    .search-container {
+        order: 3; /* Konteynerin sırası değiştirildi */
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .search-input {
+        width: calc(100% - 30px);
+        padding: 10px 15px;
+        font-size: 0.95rem;
+        margin: 0 auto;
+        display: block;
+    }
+}
+
+
+
+@media (max-width: 480px) {
+    .main-header {
+        padding: 12px 0;
+    }
+
+    .main-header .container {
+        padding: 0 12px;
+    }
+    
+    .logo {
+        min-width: 120px; /* En küçük ekranlarda minimum genişlik */
+    }
+
+    .logo img {
+        height: 40px; /* En küçük ekranlarda logo boyutu */
+    }
+
+    .search-input {
+        padding: 10px 15px;
+        padding-right: 40px;
+        font-size: 0.9rem;
+    }
+
+    .user-menu {
+        gap: 8px;
+    }
+
+    .menu-item i {
+        font-size: 1.1rem;
+    }
+}
+
+/* Dropdown Menu Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* User Dropdown Menu */
+.user-dropdown {
     position: absolute;
-    top: -8px;
-    right: -8px;
-    background: var(--secondary-color);
-    color: white;
-    font-size: 12px;
-    padding: 2px 6px;
-    border-radius: 10px;
+    top: 100%;
+    right: 0;
+    background: white;
+    min-width: 200px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    margin-top: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.menu-item:hover .user-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.user-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-left: 1px solid #e9ecef;
+    border-top: 1px solid #e9ecef;
+    transform: rotate(45deg);
+}
+
+.user-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    color: #495057;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.user-dropdown a:hover {
+    background: #f8f9fa;
+    color: #1a237e;
+}
+
+.user-dropdown a i {
+    width: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.user-dropdown hr {
+    margin: 8px 0;
+    border: none;
+    border-top: 1px solid #e9ecef;
 }
 
 /* Main Nav */

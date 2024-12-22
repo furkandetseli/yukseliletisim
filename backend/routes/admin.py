@@ -281,6 +281,46 @@ def edit_product(id):
                          brands=brands,
                          categories=categories)
 
+
+@admin_bp.route('/products/upload-image', methods=['POST'])
+@login_required
+@admin_required
+def upload_product_image():
+    if 'image' not in request.files:
+        return jsonify({'success': False, 'message': 'Dosya bulunamadı'})
+        
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'Dosya seçilmedi'})
+        
+    if file and allowed_file(file.filename):
+        try:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+            image = ProductImage(
+                image_path=filename,
+                is_primary=False  # İlk görsel değilse
+            )
+            db.session.add(image)
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'image': {
+                    'id': image.id,
+                    'path': image.image_path
+                }
+            })
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'success': False, 'message': str(e)})
+            
+    return jsonify({'success': False, 'message': 'Desteklenmeyen dosya türü'})
+
+
+
 @admin_bp.route('/products/delete-image/<int:image_id>', methods=['POST'])
 @login_required
 @admin_required

@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <!-- detail.html -->
+    <nav class="breadcrumb">
+        <a href="{{ url_for('index') }}">Anasayfa</a>
+        {% if product.category_ref %}
+        <span>/</span>
+        <a href="{{ url_for('category_products', category_name=product.category_ref.name) }}">
+            {{ product.category_ref.name }}
+        </a>
+        {% endif %}
+        <span>/</span>
+        <span>{{ product.name }}</span>
+    </nav>
+
+    <div class="product-detail">
+        <div class="product-gallery">
+            <div class="main-image">
+                {% if product.images and product.images[0] %}
+                    <img src="{{ url_for('static', filename='images/products/' + product.images[0].image_path) }}" 
+                         alt="{{ product.name }}" 
+                         id="mainImage">
+                {% endif %}
+            </div>
+            {% if product.images|length > 1 %}
+            <div class="thumbnail-list">
+                {% for image in product.images %}
+                <div class="thumbnail{% if loop.first %} active{% endif %}" onclick="changeMainImage(this)">
+                    <img src="{{ url_for('static', filename='images/products/' + image.image_path) }}" 
+                         alt="{{ product.name }}">
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="product-info">
+            <h1>{{ product.name }}</h1>
+            <div class="brand">
+                {% if product.brand %}
+                <span>Marka: {{ product.brand.name }}</span>
+                {% endif %}
+                <span class="stock-code">Stok Kodu: {{ product.stock_code }}</span>
+            </div>
+
+            <div class="price-section">
+                <div class="price">{{ "%.2f"|format(product.price) }} TL</div>
+                {% if product.stock > 0 %}
+                    <div class="stock-status available">
+                        <i class="fas fa-check-circle"></i> Stokta Var
+                    </div>
+                {% else %}
+                    <div class="stock-status unavailable">
+                        <i class="fas fa-times-circle"></i> Stokta Yok
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if product.stock > 0 %}
+            <div class="add-to-cart-section">
+                <div class="quantity-selector">
+                    <button class="quantity-btn minus" onclick="updateQuantity(-1)">-</button>
+                    <input type="number" id="quantity" value="1" min="1" max="{{ product.stock }}">
+                    <button class="quantity-btn plus" onclick="updateQuantity(1)">+</button>
+                </div>
+                <button type="button" class="add-to-cart-btn" data-product-id="{{ product.id }}">
+                    <i class="fas fa-shopping-cart"></i>
+                    Sepete Ekle
+                </button>
+            </div>
+            {% endif %}
+
+            <div class="product-description">
+                <h2>Ürün Açıklaması</h2>
+                {{ product.description|safe }}
+            </div>
+        </div>
+    </div>
+
+    {% if related_products %}
+    <section class="related-products">
+        <h2>Benzer Ürünler</h2>
+        <div class="product-grid">
+            {% for related in related_products %}
+                {% if related.id != product.id %}
+                    <div class="product-card">
+                        <a href="{{ url_for('product_detail', slug=related.slug) }}" class="product-link">
+                            <!-- Ürün kartı içeriği buraya -->
+                        </a>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function changeMainImage(thumbnail) {
+        // Tüm thumbnail'lerden active sınıfını kaldır
+        document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+        
+        // Tıklanan thumbnail'e active sınıfını ekle
+        thumbnail.classList.add('active');
+        
+        // Ana görseli değiştir
+        const mainImage = document.getElementById('mainImage');
+        mainImage.src = thumbnail.querySelector('img').src;
+    }
+    
+    function updateQuantity(change) {
+        const input = document.getElementById('quantity');
+        const currentStock = parseInt("{{ product.stock }}");
+        let value = parseInt(input.value) + change;
+        value = Math.max(1, Math.min(value, currentStock));
+        input.value = value;
+    }
+    
+    function addToCart(productId) {
+        const quantity = document.getElementById('quantity').value;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        
+        fetch(`/cart/add/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ quantity: quantity })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) {
+                    cartCount.textContent = data.cart_count;
+                }
+                alert('Ürün sepete eklendi!');
+            } else {
+                alert('Bir hata oluştu!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu!');
+        });
+    }
+    </script>
+{% endblock %}

@@ -1,0 +1,306 @@
+/* Admin Panel Styles */
+:root {
+    --sidebar-width: 250px;
+    --header-height: 60px;
+    --primary-color: #1a237e;
+    --secondary-color: #e31837;
+    --text-color: #333;
+    --bg-color: #f4f6f9;
+    --border-color: #ddd;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.admin-sidebar {
+    width: var(--sidebar-width);
+    background: var(--primary-color);
+    color: white;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.admin-logo {
+    max-width: 120px;
+    margin-bottom: 10px;
+}
+
+.sidebar-header h1 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.sidebar-nav i {
+    width: 20px;
+    margin-right: 10px;
+}
+
+/* Main Content Area */
+.admin-main {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+}
+
+.admin-header {
+    height: var(--header-height);
+    background: white;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.admin-content {
+    padding: 20px;
+}
+
+/* Component Styles */
+.alert {
+    padding: 12px 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #151b60;
+}
+
+.logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background: var(--secondary-color);
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.logout-btn:hover {
+    background: #c41a1a;
+}
+
+/* Table Styles */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        width: 70px;
+    }
+    
+    .sidebar-header h1,
+    .sidebar-nav span {
+        display: none;
+    }
+    
+    .admin-main {
+        margin-left: 70px;
+    }
+    
+    .admin-logo {
+        width: 40px;
+    }
+}
+/* Ürün listesi için ek stiller */
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.btn-danger {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c41a1a;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.current-page {
+    padding: 5px 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.btn-outline {
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-color);
+}
+
+.btn-outline:hover {
+    background: #f8f9fa;
+}
+/* Sipariş listesi için ek stiller */
+.badge {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.badge-primary {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+#statusFilter {
+    min-width: 200px;
+}

@@ -1,0 +1,188 @@
+<!-- templates/admin/categories/index.html -->
+{% extends 'admin/base.html' %}
+
+{% block title %}Kategori Yönetimi{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h2>Kategoriler</h2>
+    <a href="{{ url_for('admin.create_category') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Yeni Kategori
+    </a>
+</div>
+
+<div class="categories-container">
+    <div class="category-tree" id="categoryTree">
+        {% macro render_categories(categories, level=0) %}
+            {% for category in categories %}
+            <div class="category-item" data-id="{{ category.id }}" data-level="{{ level }}">
+                <div class="category-content">
+                    <div class="drag-handle">
+                        <i class="fas fa-grip-vertical"></i>
+                    </div>
+                    <div class="category-info">
+                        <span class="name">{{ category.name }}</span>
+                        <span class="badge {{ 'badge-success' if category.is_active else 'badge-secondary' }}">
+                            {{ 'Aktif' if category.is_active else 'Pasif' }}
+                        </span>
+                    </div>
+                    <div class="actions">
+                        <a href="{{ url_for('admin.edit_category', id=category.id) }}" 
+                           class="btn btn-sm btn-info">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button onclick="deleteCategory(`{{ category.id }}`)" 
+                                class="btn btn-sm btn-danger">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                {% if category.children.count() > 0 %}
+                    <div class="subcategories">
+                        {{ render_categories(category.children, level + 1) }}
+                    </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% endmacro %}
+
+        {{ render_categories(categories|selectattr("parent_id", "none")|list) }}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.categories-container {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.category-tree {
+    margin-top: 20px;
+}
+
+.category-item {
+    margin: 5px 0;
+}
+
+.category-content {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.category-item[data-level="1"] {
+    margin-left: 20px;
+}
+
+.category-item[data-level="2"] {
+    margin-left: 40px;
+}
+
+.drag-handle {
+    cursor: move;
+    padding: 0 10px;
+    color: #999;
+}
+
+.category-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.actions {
+    display: flex;
+    gap: 5px;
+}
+
+.badge {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.badge-success {
+    background: #28a745;
+    color: white;
+}
+
+.badge-secondary {
+    background: #6c757d;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    new Sortable(document.getElementById('categoryTree'), {
+        handle: '.drag-handle',
+        animation: 150,
+        onEnd: function(evt) {
+            updateCategoryOrder();
+        }
+    });
+});
+
+function deleteCategory(id) {
+    if (confirm('Bu kategoriyi silmek istediğinizden emin misiniz?')) {
+        fetch(`/admin/categories/delete/${id}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                throw new Error('Kategori silinirken bir hata oluştu');
+            }
+        })
+        .catch(error => {
+            alert(error.message);
+        });
+    }
+}
+
+function updateCategoryOrder() {
+    const categories = [];
+    document.querySelectorAll('.category-item').forEach((item, index) => {
+        categories.push({
+            id: parseInt(item.dataset.id),
+            order: index,
+            parent_id: item.parentElement.closest('.category-item')?.dataset.id || null
+        });
+    });
+
+    fetch('/admin/categories/reorder', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify(categories)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            alert('Sıralama güncellenirken bir hata oluştu');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Bir hata oluştu');
+    });
+}
+</script>
+{% endblock %}

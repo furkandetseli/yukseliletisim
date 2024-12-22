@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}Yüksel İletişim{% endblock %}</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/product.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Duyuru Bandı -->
+    <div class="announcement-bar">
+        TÜRKİYE'NİN HER NOKTASINA 1.000 TL VE ÜZERİ TÜM SİPARİŞLERDE KARGO BEDAVA!
+    </div>
+
+    <!-- Üst Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="header-contact">
+                <a href="tel:05305600735">
+                    <i class="fas fa-phone"></i>
+                    0530 560 0735
+                </a>
+                <a href="https://wa.me/05305600735">
+                    <i class="fab fa-whatsapp"></i>
+                    0530 560 0735
+                </a>
+                <a href="mailto:info@yukseliletisim.com">
+                    <i class="fas fa-envelope"></i>
+                    info@yukseliletisim.com
+                </a>
+            </div>
+            <div class="header-menu">
+                <a href="{{ url_for('index') }}">Hakkımızda</a>
+                <a href="{{ url_for('index') }}">Yardım</a>
+                <a href="{{ url_for('index') }}">İletişim</a>
+                <a href="{{ url_for('index') }}">
+                    <i class="fas fa-truck"></i>
+                    Sipariş Takibi
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ana Header -->
+    <header class="main-header">
+        <div class="container">
+            <!-- Logo -->
+            <div class="logo">
+                <a href="{{ url_for('index') }}">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" 
+                         onerror="this.src='\/static\/images\/default-logo.png'" 
+                         alt="Yüksel İletişim">
+                </a>
+            </div>
+
+            <!-- Arama -->
+            <div class="search-container">
+                <form action="{{ url_for('search') }}" method="GET">
+                    <input type="text" 
+                           name="q" 
+                           class="search-input" 
+                           placeholder="Hangi ürünü aramıştınız?"
+                           autocomplete="off"
+                           required>
+                    <button type="submit" class="search-button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Kullanıcı Menüsü -->
+            <div class="user-menu">
+                <!-- Mobil Menü Butonu -->
+                <button class="mobile-menu-button" id="mobileMenuButton">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <a href="#" class="menu-item">
+                    <i class="far fa-heart"></i>
+                    <span>Favorilerim</span>
+                </a>
+                {% if current_user.is_authenticated %}
+                    <a href="#" class="menu-item">
+                        <i class="far fa-user"></i>
+                        <span>Hesabım</span>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="menu-item">
+                        <i class="far fa-user"></i>
+                        <span>Giriş Yap</span>
+                    </a>
+                {% endif %}
+                <a href="{{ url_for('cart') }}" class="menu-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Sepetim</span>
+                    {% if cart_count and cart_count > 0 %}
+                        <div class="cart-count">{{ cart_count }}</div>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    </header>
+
+   <!-- Ana Navigasyon -->
+    <!-- templates/base.html'deki navigasyon kısmı -->
+
+    <nav class="main-nav">
+        <div class="container">
+            <div class="nav-wrapper">
+                <!-- Ana Menu -->
+                <ul class="nav-list">
+                    {% for category in categories %}
+                    <li class="nav-item{% if category.children.count() > 0 %} has-dropdown{% endif %}">
+                        <a href="{{ url_for('category_products', category_name=category.name) }}" class="nav-link">
+                            {{ category.name }}
+                            {% if category.children.count() > 0 %}
+                            <i class="fas fa-chevron-down"></i>
+                            {% endif %}
+                        </a>
+                        {% if category.children.count() > 0 %}
+                        <div class="mega-menu">
+                            <div class="mega-menu-content">
+                                <div class="menu-grid">
+                                    {% for subcategory in category.children %}
+                                    <div class="menu-column">
+                                        <h4>
+                                            <a href="{{ url_for('category_products', category_name=subcategory.name) }}">
+                                                {{ subcategory.name }}
+                                            </a>
+                                        </h4>
+                                        {% if subcategory.children.count() > 0 %}
+                                        <ul>
+                                            {% for sub_sub in subcategory.children %}
+                                            <li>
+                                                <a href="{{ url_for('category_products', category_name=sub_sub.name) }}">
+                                                    {{ sub_sub.name }}
+                                                </a>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+     </nav>
+
+    <!-- Mobil Menü -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <h3>Menü</h3>
+            <button class="close-menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mobile-menu-content">
+            <!-- Kullanıcı Bilgisi -->
+            <div class="user-info">
+                {% if current_user.is_authenticated %}
+                    <p>Merhaba, {{ current_user.first_name }}</p>
+                    <a href="{{ url_for('logout') }}">Çıkış Yap</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Giriş Yap / Üye Ol</a>
+                {% endif %}
+            </div>
+
+            <!-- Mobil Navigasyon -->
+            <nav class="mobile-nav">
+                {% for category in categories %}
+                <div class="mobile-nav-item">
+                    <div class="mobile-nav-header">
+                        <a href="{{ url_for('category_products', category_name=category.name) }}">
+                            {{ category.name }}
+                        </a>
+                        {% if category.children.count() > 0 %}
+                        <button class="toggle-submenu">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% if category.children.count() > 0 %}
+                    <div class="mobile-submenu">
+                        {% for subcategory in category.children %}
+                        <a href="{{ url_for('category_products', category_name=subcategory.name) }}">
+                            {{ subcategory.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </nav>
+        </div>
+    </div>
+
+    <!-- Mobil Arama -->
+    <div class="mobile-search" id="mobileSearch">
+        <div class="mobile-search-header">
+            <button class="close-search">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <form action="{{ url_for('search') }}" method="GET" class="mobile-search-form">
+                <input type="text" 
+                    name="q" 
+                    class="mobile-search-input" 
+                    placeholder="Ne aramıştınız? (örn. iPhone 13 kılıf, AirPods...)">
+                <button type="submit" class="mobile-search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        <div class="mobile-search-content">
+            <div class="popular-searches">
+                <h4>Popüler Aramalar</h4>
+                <div class="search-tags">
+                    <a href="#">iPhone 13 Kılıf</a>
+                    <a href="#">AirPods</a>
+                    <a href="#">Samsung Şarj Aleti</a>
+                    <a href="#">Powerbank</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="#" class="bottom-nav-item" id="searchToggle">
+            <div class="bottom-search-bar">
+                <i class="fas fa-search"></i>
+                <span>Ne aramıştınız?</span>
+            </div>
+        </a>
+    </nav>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('index') }}" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Anasayfa</span>
+        </a>
+        <a href="{{ url_for('cart') }}" class="bottom-nav-item">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Sepetim</span>
+            {% if cart_count and cart_count > 0 %}
+                <span class="bottom-nav-badge">{{ cart_count }}</span>
+            {% endif %}
+        </a>
+        <a href="#" class="bottom-nav-item">
+            <i class="far fa-heart"></i>
+            <span>Favoriler</span>
+        </a>
+        <a href="{{ url_for('login') }}" class="bottom-nav-item">
+            <i class="far fa-user"></i>
+            <span>Hesabım</span>
+        </a>
+    </nav>
+
+    <!-- Mobil Arama -->
+    <div class="mobile-search" id="mobileSearch">
+        <div class="mobile-search-header">
+            <button class="close-search">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <input type="text" class="mobile-search-input" placeholder="Ürün, kategori ara...">
+        </div>
+    </div>
+    <!-- Ana İçerik -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <!-- Kurumsal -->
+                <div class="footer-section">
+                    <h3>Kurumsal</h3>
+                    <ul>
+                        <li><a href="{{ url_for('index') }}">Hakkımızda</a></li>
+                        <li><a href="{{ url_for('index') }}">İletişim</a></li>
+                        <li><a href="{{ url_for('index') }}">KVKK</a></li>
+                        <li><a href="{{ url_for('index') }}">Gizlilik Politikası</a></li>
+                    </ul>
+                </div>
+
+                <!-- Müşteri Hizmetleri -->
+                <div class="footer-section">
+                    <h3>Müşteri Hizmetleri</h3>
+                    <ul>
+                        <li><a href="{{ url_for('index') }}">Sipariş Takibi</a></li>
+                        <li><a href="{{ url_for('index') }}">İade Koşulları</a></li>
+                        <li><a href="{{ url_for('index') }}">Garanti Şartları</a></li>
+                        <li><a href="{{ url_for('index') }}">Sıkça Sorulan Sorular</a></li>
+                    </ul>
+                </div>
+
+                <!-- İletişim -->
+                <div class="footer-section">
+                    <h3>Bize Ulaşın</h3>
+                    <div class="contact-info">
+                        <p><i class="fas fa-phone"></i> 0530 560 0735</p>
+                        <p><i class="fab fa-whatsapp"></i> 0530 560 0735</p>
+                        <p><i class="fas fa-envelope"></i> info@yukseliletisim.com</p>
+                    </div>
+                    <div class="social-media">
+                        <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <!-- Ödeme -->
+                <div class="footer-section">
+                    <h3>Güvenli Ödeme</h3>
+                    <div class="payment-methods">
+                        <img src="{{ url_for('static', filename='images/payment-methods.png') }}"
+                             onerror="this.style.display='none'"
+                             alt="Ödeme Yöntemleri">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alt Footer -->
+            <div class="footer-bottom">
+                <p>&copy; 2024 Yüksel İletişim. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp İletişim -->
+    <div class="whatsapp-float">
+        <a href="https://wa.me/05305600735" target="_blank">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+    </div>
+
+    <!-- Canlı Destek -->
+    <div class="live-chat-float">
+        <button id="liveChatButton">
+            <i class="fas fa-comments"></i>
+            <span>Canlı Destek</span>
+        </button>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

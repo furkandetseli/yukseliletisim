@@ -1,0 +1,155 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Sipariş Yönetimi{% endblock %}
+
+{% block page_title %}Siparişler{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-left">
+        <h2>Sipariş Listesi</h2>
+    </div>
+    <div class="header-right">
+        <select id="statusFilter" class="form-control" onchange="filterOrders(this.value)">
+            <option value="">Tüm Siparişler</option>
+            <option value="Beklemede">Beklemede</option>
+            <option value="Onaylandı">Onaylandı</option>
+            <option value="Kargoda">Kargoda</option>
+            <option value="Tamamlandı">Tamamlandı</option>
+            <option value="İptal">İptal</option>
+        </select>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Sipariş No</th>
+                <th>Müşteri</th>
+                <th>Tutar</th>
+                <th>Durum</th>
+                <th>Tarih</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders.items %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.user.first_name }} {{ order.user.last_name }}</td>
+                <td>{{ "%.2f"|format(order.total_amount) }} TL</td>
+                <td>
+                    <span class="badge badge-{{ {
+                        'Beklemede': 'warning',
+                        'Onaylandı': 'info',
+                        'Kargoda': 'primary',
+                        'Tamamlandı': 'success',
+                        'İptal': 'danger'
+                    }[order.status] }}">
+                        {{ order.status }}
+                    </span>
+                </td>
+                <td>{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('admin.order_detail', id=order.id) }}" class="btn btn-sm btn-info">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <button onclick="showStatusModal('{{ order.id }}')" class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Sayfalama -->
+<div class="pagination">
+    {% if orders.has_prev %}
+    <a href="{{ url_for('admin.orders', page=orders.prev_num, status=request.args.get('status', '')) }}" class="btn btn-outline">Önceki</a>
+    {% endif %}
+    
+    <span class="current-page">Sayfa {{ orders.page }} / {{ orders.pages }}</span>
+    
+    {% if orders.has_next %}
+    <a href="{{ url_for('admin.orders', page=orders.next_num, status=request.args.get('status', '')) }}" class="btn btn-outline">Sonraki</a>
+    {% endif %}
+</div>
+
+<!-- Durum Güncelleme Modal -->
+<div id="statusModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Sipariş Durumu Güncelle</h3>
+        <form id="updateStatusForm">
+            <input type="hidden" id="orderId">
+            <div class="form-group">
+                <label for="status">Yeni Durum</label>
+                <select id="status" class="form-control" required>
+                    <option value="Beklemede">Beklemede</option>
+                    <option value="Onaylandı">Onaylandı</option>
+                    <option value="Kargoda">Kargoda</option>
+                    <option value="Tamamlandı">Tamamlandı</option>
+                    <option value="İptal">İptal</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Güncelle</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showStatusModal(orderId) {
+    document.getElementById('orderId').value = orderId;
+    document.getElementById('statusModal').style.display = 'block';
+}
+
+function updateOrderStatus(orderId, status) {
+    fetch(`/admin/orders/${orderId}/update-status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Durum güncellenirken bir hata oluştu!');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Bir hata oluştu!');
+    });
+}
+
+document.getElementById('updateStatusForm').onsubmit = function(e) {
+    e.preventDefault();
+    const orderId = document.getElementById('orderId').value;
+    const status = document.getElementById('status').value;
+    updateOrderStatus(orderId, status);
+}
+
+// Modal kapatma
+document.querySelector('.close').onclick = function() {
+    document.getElementById('statusModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('statusModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

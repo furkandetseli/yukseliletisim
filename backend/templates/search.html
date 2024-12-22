@@ -1,0 +1,372 @@
+<!-- templates/search.html -->
+{% extends 'base.html' %}
+
+{% block title %}Arama Sonuçları - {{ query }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="search-results">
+        <h1>Arama Sonuçları</h1>
+        <p class="search-query">"{{ query }}" için {{ products|length }} sonuç bulundu</p>
+
+        {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <a href="{{ url_for('product_detail', slug=product.slug) }}" class="product-link">
+                    <div class="product-image">
+                        {% if product.images and product.images[0] %}
+                            <img src="{{ url_for('static', filename='images/products/' + product.images[0].image_path) }}"
+                                 alt="{{ product.name }}"
+                                 loading="lazy">
+                        {% else %}
+                            <div class="no-image">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        {% endif %}
+                        
+                        {% if product.stock == 0 %}
+                            <div class="stock-badge out">Stokta Yok</div>
+                        {% elif product.stock <= 5 %}
+                            <div class="stock-badge limited">Sınırlı Stok</div>
+                        {% endif %}
+                    </div>
+            
+                    <div class="product-info">
+                        {% if product.brand %}
+                            <div class="brand">{{ product.brand.name }}</div>
+                        {% endif %}
+                        
+                        <div class="product-title">{{ product.name }}</div>
+                        
+                        <div class="price-container">
+                            {% if product.old_price and product.old_price > product.price %}
+                                <div class="old-price">{{ "%.2f"|format(product.old_price) }} TL</div>
+                                <div class="discount">-%{{ ((product.old_price - product.price) / product.old_price * 100)|round|int }}</div>
+                            {% endif %}
+                            <div class="current-price">{{ "%.2f"|format(product.price) }} TL</div>
+                        </div>
+            
+                        {% if product.stock > 0 %}
+                            <button class="add-to-cart-btn" data-product-id="{{ product.id }}">
+                                <i class="fas fa-shopping-cart"></i>
+                                Sepete Ekle
+                            </button>
+                        {% else %}
+                            <button class="add-to-cart-btn disabled" disabled>
+                                <i class="fas fa-times"></i>
+                                Stokta Yok
+                            </button>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <p>Aramanızla eşleşen ürün bulunamadı.</p>
+                <div class="suggestions">
+                    <p>Öneriler:</p>
+                    <ul>
+                        <li>Farklı arama kelimeleri deneyin</li>
+                        <li>Daha genel terimler kullanın</li>
+                        <li>Yazım hatası olmadığından emin olun</li>
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.search-results {
+    padding: 40px 0;
+}
+
+.search-results h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.search-query {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.product-card {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease;
+    height: 100%;
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+}
+
+.product-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.product-image {
+    position: relative;
+    aspect-ratio: 1;
+    background: #f8f9fa;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.5s ease;
+    padding: 0;
+    margin: 0;
+    display: block;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.05);
+}
+
+.product-info {
+    padding: 12px 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 8px;
+}
+
+.brand {
+    color: #1a237e;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.product-title {
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.3;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    height: 2.6em;
+    margin: 0;
+}
+
+.price-container {
+    margin: 5px 0;
+    padding: 0;
+}
+
+.current-price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1a237e;
+}
+
+.old-price {
+    color: #999;
+    text-decoration: line-through;
+    font-size: 0.85rem;
+    margin-right: 5px;
+}
+
+.discount {
+    display: inline-block;
+    background: #dc3545;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin-left: 5px;
+}
+
+.add-to-cart-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border: none;
+    border-radius: 6px;
+    background: #1a237e;
+    color: white;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.add-to-cart-btn:hover {
+    background: #0d1b6f;
+}
+
+.add-to-cart-btn.disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.stock-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: white;
+}
+
+.stock-badge.out {
+    background: #dc3545;
+}
+
+.stock-badge.limited {
+    background: #ffc107;
+    color: #000;
+}
+
+/* Kategori ve arama sonuçları için ek stiller */
+.category-header,
+.search-header {
+    margin-bottom: 25px;
+}
+
+.category-title,
+.search-title {
+    font-size: 1.8rem;
+    color: #1a237e;
+    margin-bottom: 10px;
+}
+
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.sort-select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    min-width: 200px;
+}
+
+/* Responsive düzenlemeler */
+@media (max-width: 1200px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+    .product-info {
+        padding: 10px;
+    }
+
+    .current-price {
+        font-size: 1.1rem;
+    }
+
+    .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sort-select {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .product-info {
+        padding: 8px;
+    }
+
+    .product-title {
+        font-size: 0.85rem;
+    }
+
+    .add-to-cart-btn {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+}
+
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.no-results i {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.suggestions {
+    max-width: 400px;
+    margin: 20px auto 0;
+}
+
+.suggestions ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+}
+
+.suggestions li {
+    color: #666;
+    margin: 8px 0;
+}
+</style>
+{% endblock %}

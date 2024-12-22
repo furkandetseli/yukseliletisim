@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="auth-container d-flex justify-content-center align-items-center vh-100">
+    <div class="auth-box p-4 shadow rounded bg-white" style="max-width: 400px; width: 100%;">
+        <h2 class="text-center mb-4 text-primary">Kayıt Ol</h2>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register') }}">
+            <div class="form-group mb-3">
+                <label for="first_name" class="form-label">Ad</label>
+                <input type="text" id="first_name" name="first_name" class="form-control" required>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="last_name" class="form-label">Soyad</label>
+                <input type="text" id="last_name" name="last_name" class="form-control" required>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="email" class="form-label">E-posta Adresi</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            
+            <div class="form-group mb-4">
+                <label for="password" class="form-label">Şifre</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 py-2">Kayıt Ol</button>
+        </form>
+        
+        <div class="auth-links text-center mt-3">
+            <p>Zaten hesabınız var mı? <a href="{{ url_for('login') }}" class="text-decoration-none text-primary">Giriş Yap</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .auth-container {
+        background: linear-gradient(to right, #6a11cb, #2575fc);
+    }
+
+    .auth-box {
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+        background: #2575fc;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: #6a11cb;
+    }
+</style>
+{% endblock %}

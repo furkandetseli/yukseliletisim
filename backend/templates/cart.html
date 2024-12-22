@@ -1,0 +1,161 @@
+<!-- templates/cart.html -->
+{% extends 'base.html' %}
+
+{% block title %}Alışveriş Sepetim{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="cart-page">
+        <div class="page-header">
+            <h1>Alışveriş Sepetim</h1>
+        </div>
+
+        {% if cart_items %}
+            <div class="cart-content">
+                <div class="cart-grid">
+                    <!-- Sol Taraf - Sepet Ürünleri -->
+                    <div class="cart-items">
+                        {% for item in cart_items %}
+                        <div class="cart-item" data-product-id="{{ item.product.id }}" data-price="{{ item.product.price }}">
+                            <div class="item-image">
+                                {% if item.product.images and item.product.images[0] %}
+                                    <img src="{{ url_for('static', filename='images/products/' + item.product.images[0].image_path) }}"
+                                         alt="{{ item.product.name }}"
+                                         loading="lazy">
+                                {% else %}
+                                    <div class="no-image">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="item-details">
+                                {% if item.product.brand %}
+                                    <div class="brand">{{ item.product.brand.name }}</div>
+                                {% endif %}
+                                <h3>{{ item.product.name }}</h3>
+                                <div class="item-meta">
+                                    <div class="stock-info">
+                                        {% if item.product.stock > 0 %}
+                                            <i class="fas fa-check"></i> Stokta
+                                        {% else %}
+                                            <i class="fas fa-times"></i> Stokta Yok
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="price-info">
+                                    {% if item.product.old_price and item.product.old_price > item.product.price %}
+                                        <div class="item-old-price">{{ "%.2f"|format(item.product.old_price) }} TL</div>
+                                    {% endif %}
+                                    <div class="item-price">{{ "%.2f"|format(item.product.price) }} TL</div>
+                                </div>
+                            </div>
+
+                            <div class="quantity-selector">
+                                <button type="button" class="quantity-btn minus">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" 
+                                       class="quantity-input" 
+                                       value="{{ item.quantity }}" 
+                                       min="1" 
+                                       max="99"
+                                       data-price="{{ item.product.price }}">
+                                <button type="button" class="quantity-btn plus">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+
+                            <div class="item-total">
+                                {{ "%.2f"|format(item.product.price * item.quantity) }} TL
+                            </div>
+
+                            <button type="button" class="remove-item" title="Ürünü Kaldır">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Sağ Taraf - Sepet Özeti -->
+                    <div class="cart-sidebar">
+                        <div class="cart-summary">
+                            <h2>Sipariş Özeti</h2>
+                            
+                            <div class="summary-row">
+                                <span>Ara Toplam:</span>
+                                <span class="subtotal-amount">{{ "%.2f"|format(subtotal) }} TL</span>
+                            </div>
+
+                            <div class="summary-row">
+                                <span>Kargo:</span>
+                                <span class="shipping-amount">
+                                    {% if subtotal >= 1000 %}
+                                        Ücretsiz
+                                    {% else %}
+                                        29.90 TL
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            {% if subtotal >= 1000 %}
+                                <div class="free-shipping-info">
+                                    <i class="fas fa-truck"></i>
+                                    <span>Kargo Bedava!</span>
+                                </div>
+                            {% else %}
+                                <div class="shipping-progress">
+                                    <div class="progress-text">
+                                        Bedava kargo için {{ "%.2f"|format(1000 - subtotal) }} TL daha harcayın!
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <div class="summary-row total">
+                                <span>Toplam:</span>
+                                <span class="total-amount">
+                                    {{ "%.2f"|format(subtotal if subtotal >= 1000 else subtotal + 29.90) }} TL
+                                </span>
+                            </div>
+
+                            <button class="checkout-btn">
+                                <i class="fas fa-lock"></i>
+                                Alışverişi Tamamla
+                            </button>
+
+                            <div class="secure-checkout">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>256-bit SSL ile güvenli ödeme</span>
+                            </div>
+                        </div>
+
+                        <div class="continue-shopping">
+                            <a href="{{ url_for('index') }}" class="continue-link">
+                                <i class="fas fa-arrow-left"></i>
+                                Alışverişe Devam Et
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <h2>Sepetiniz Boş</h2>
+                <p>Sepetinizde ürün bulunmamaktadır.</p>
+                <a href="{{ url_for('index') }}" class="continue-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Alışverişe Başla
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Bildirimler için konteyner -->
+<div id="notifications-container"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+{% endblock %}

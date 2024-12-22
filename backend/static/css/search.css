@@ -1,0 +1,42 @@
+/* static/css/search.css */
+.search-results {
+    padding: 40px 0;
+}
+
+.search-results h1 {
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+.search-query {
+    margin-bottom: 30px;
+    color: #666;
+    font-size: 16px;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px;
+    background: var(--light-gray);
+    border-radius: 8px;
+}
+
+.no-results p {
+    margin-bottom: 20px;
+}
+
+.no-results ul {
+    list-style: none;
+    padding: 0;
+}
+
+.no-results li {
+    margin: 10px 0;
+    color: #666;
+}

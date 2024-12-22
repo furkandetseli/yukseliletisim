@@ -103,10 +103,11 @@ class ProductImage(db.Model):
     is_primary = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+# models.py içinde Brand sınıfını güncelleyelim
 class Brand(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)  # nullable=False ekledik
     # Brand'den Product'a olan ilişki
     products = db.relationship('Product', back_populates='brand', lazy=True)
 
@@ -119,6 +120,7 @@ class Product(db.Model):
     brand_id = db.Column(db.Integer, db.ForeignKey('brand.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     stock = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)  # Yeni eklenen alan
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     slug = db.Column(db.String(200), unique=True, 
                     name='uq_product_slug')  # unique constraint için isim verdik

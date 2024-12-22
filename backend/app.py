@@ -103,7 +103,8 @@ def create_app():
                 password = request.form.get('password')
                 first_name = request.form.get('first_name')
                 last_name = request.form.get('last_name')
-                
+                phone  = request.form.get('phone')
+
                 if User.query.filter_by(email=email).first():
                     flash('Bu email adresi zaten kayıtlı')
                     return redirect(url_for('register'))
@@ -111,7 +112,8 @@ def create_app():
                 user = User(
                     email=email,
                     first_name=first_name,
-                    last_name=last_name
+                    last_name=last_name,
+                    phone=phone
                 )
                 user.set_password(password)
                 

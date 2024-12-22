@@ -1,72 +1,685 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="auth-container d-flex justify-content-center align-items-center vh-100">
-    <div class="auth-box p-4 shadow rounded bg-white" style="max-width: 400px; width: 100%;">
-        <h2 class="text-center mb-4 text-primary">Kayıt Ol</h2>
+<div class="register-page">
+    <div class="register-container">
+        <div class="register-box">
+            <div class="register-header">
+                <h1>Hesap Oluştur</h1>
+                <p>Hızlı ve güvenli alışveriş için üye olun.</p>
+            </div>
 
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-danger">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
 
-        <form method="POST" action="{{ url_for('register') }}">
-            <div class="form-group mb-3">
-                <label for="first_name" class="form-label">Ad</label>
-                <input type="text" id="first_name" name="first_name" class="form-control" required>
+            <form method="POST" action="{{ url_for('register') }}" class="register-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first_name">
+                            <i class="fas fa-user"></i>
+                            Ad
+                        </label>
+                        <input type="text" 
+                               id="first_name" 
+                               name="first_name" 
+                               placeholder="Adınız"
+                               required
+                               autocomplete="given-name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last_name">
+                            <i class="fas fa-user"></i>
+                            Soyad
+                        </label>
+                        <input type="text" 
+                               id="last_name" 
+                               name="last_name" 
+                               placeholder="Soyadınız"
+                               required
+                               autocomplete="family-name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i>
+                        E-posta Adresi
+                    </label>
+                    <input type="email" 
+                           id="email" 
+                           name="email" 
+                           placeholder="E-posta adresiniz"
+                           required
+                           autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">
+                        <i class="fas fa-phone"></i>
+                        Telefon Numarası
+                    </label>
+                    <input type="tel" 
+                           id="phone" 
+                           name="phone" 
+                           placeholder="(5xx) xxx xx xx"
+                           pattern="[0-9]{10}"
+                           required
+                           autocomplete="tel">
+                    <small class="input-help">Başında 0 olmadan 10 haneli olarak girin</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                        Şifre
+                    </label>
+                    <div class="password-input">
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               placeholder="Şifreniz"
+                               required
+                               minlength="8">
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <small class="input-help">En az 8 karakter, büyük/küçük harf ve rakam içermeli</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="password_confirm">
+                        <i class="fas fa-lock"></i>
+                        Şifre Tekrar
+                    </label>
+                    <div class="password-input">
+                        <input type="password" 
+                               id="password_confirm" 
+                               name="password_confirm" 
+                               placeholder="Şifrenizi tekrar girin"
+                               required>
+                        <button type="button" class="toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="agreement-section">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="privacy_policy" required>
+                        <span class="checkmark"></span>
+                        <span class="label-text">
+                            <a href="#" target="_blank">Gizlilik Politikası</a>'nı okudum ve kabul ediyorum
+                        </span>
+                    </label>
+
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="terms_conditions" required>
+                        <span class="checkmark"></span>
+                        <span class="label-text">
+                            <a href="#" target="_blank">Üyelik Sözleşmesi</a>'ni okudum ve kabul ediyorum
+                        </span>
+                    </label>
+
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="marketing_emails">
+                        <span class="checkmark"></span>
+                        <span class="label-text">
+                            Kampanya ve fırsatlardan haberdar olmak istiyorum
+                        </span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="register-button">
+                    <i class="fas fa-user-plus"></i>
+                    Hesap Oluştur
+                </button>
+            </form>
+
+            <div class="register-footer">
+                <p>Zaten hesabınız var mı?</p>
+                <a href="{{ url_for('login') }}" class="login-link">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Giriş Yap
+                </a>
             </div>
-            
-            <div class="form-group mb-3">
-                <label for="last_name" class="form-label">Soyad</label>
-                <input type="text" id="last_name" name="last_name" class="form-control" required>
+
+            <div class="social-register">
+                <p>veya şununla devam et</p>
+                <div class="social-buttons">
+                    <button type="button" class="google-register">
+                        <i class="fab fa-google"></i>
+                        Google ile Kaydol
+                    </button>
+                </div>
             </div>
-            
-            <div class="form-group mb-3">
-                <label for="email" class="form-label">E-posta Adresi</label>
-                <input type="email" id="email" name="email" class="form-control" required>
-            </div>
-            
-            <div class="form-group mb-4">
-                <label for="password" class="form-label">Şifre</label>
-                <input type="password" id="password" name="password" class="form-control" required>
-            </div>
-            
-            <button type="submit" class="btn btn-primary w-100 py-2">Kayıt Ol</button>
-        </form>
-        
-        <div class="auth-links text-center mt-3">
-            <p>Zaten hesabınız var mı? <a href="{{ url_for('login') }}" class="text-decoration-none text-primary">Giriş Yap</a></p>
         </div>
     </div>
 </div>
 
 <style>
-    body {
-        background-color: #f8f9fa;
-        font-family: 'Roboto', sans-serif;
+.register-page {
+    min-height: calc(100vh - var(--header-height));
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+    padding: 40px 20px;
+}
+
+.register-container {
+    max-width: 580px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.register-box {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    padding: 40px;
+}
+
+.register-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.register-header h1 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.register-header p {
+    color: #666;
+    font-size: 1rem;
+}
+
+.alert {
+    background: #fff5f5;
+    color: #dc2626;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.form-group label i {
+    color: var(--primary-color);
+}
+
+.input-help {
+    display: block;
+    color: #666;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
+    outline: none;
+}
+
+/* Telefon input alanı için özel stiller */
+input[type="tel"] {
+    letter-spacing: 0.5px;
+    font-family: monospace;
+    font-size: 1.1rem;
+}
+
+/* Webkit tarayıcılar için ok kaldırma */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox için ok kaldırma */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.password-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input input {
+    flex: 1;
+    padding-right: 40px; /* Göz ikonu için yer bırak */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-password:hover {
+    color: var(--primary-color);
+}
+
+.agreement-section {
+    margin: 30px 0;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: relative;
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+    border: 2px solid #e5e7eb;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.custom-checkbox:hover input ~ .checkmark {
+    border-color: #ccc;
+}
+
+.custom-checkbox input:checked ~ .checkmark {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* Şifre Gücü Göstergesi */
+.strength-indicator {
+    margin-top: 8px;
+}
+
+.strength-bar-container {
+    width: 100%;
+    height: 4px;
+    background-color: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.label-text {
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.4;
+}
+
+.label-text a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.label-text a:hover {
+    text-decoration: underline;
+}
+
+.register-button {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.register-button:hover {
+    background: #151b60;
+    transform: translateY(-1px);
+}
+
+.register-footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.register-footer p {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.login-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-link:hover {
+    text-decoration: underline;
+}
+
+.social-register {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.social-register p {
+    color: #666;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.social-register p::before,
+.social-register p::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 25%;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.social-register p::before {
+    left: 0;
+}
+
+.social-register p::after {
+    right: 0;
+}
+
+.social-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.google-register {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    color: #333;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.google-register:hover {
+    background: #f8f9fa;
+    border-color: #ddd;
+}
+
+@media (max-width: 580px) {
+    .register-box {
+        padding: 30px 20px;
     }
 
-    .auth-container {
-        background: linear-gradient(to right, #6a11cb, #2575fc);
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
 
-    .auth-box {
-        background-color: #fff;
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    .social-register p::before,
+    .social-register p::after {
+        width: 20%;
     }
-
-    .btn-primary {
-        background: #2575fc;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background: #6a11cb;
-    }
+}
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Şifre göster/gizle işlevselliği
+    document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', function() {
+            const input = this.parentElement.querySelector('input');
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+    });
+
+    // Şifre eşleşme kontrolü
+    const password = document.getElementById('password');
+    const passwordConfirm = document.getElementById('password_confirm');
+    const form = document.querySelector('.register-form');
+
+    form.addEventListener('submit', function(e) {
+        if (password.value !== passwordConfirm.value) {
+            e.preventDefault();
+            alert('Şifreler eşleşmiyor!');
+            passwordConfirm.focus();
+        }
+    });
+
+    // Telefon numarası formatlaması
+    const phoneInput = document.getElementById('phone');
+    
+    phoneInput.addEventListener('input', function(e) {
+        // Sadece rakamları al
+        let value = e.target.value.replace(/\D/g, '');
+        
+        // İlk rakamı 5 yap
+        if (value.length > 0 && value[0] !== '5') {
+            value = '5' + value.slice(1);
+        }
+        
+        // 10 karakterden fazlasını kes
+        if (value.length > 10) {
+            value = value.slice(0, 10);
+        }
+        
+        this.value = value;
+    });
+
+    // Şifre güçlülük kontrolü
+    const passwordInput = document.getElementById('password');
+    
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        
+        // En az 8 karakter
+        if (password.length >= 8) strength++;
+        
+        // Büyük harf kontrolü
+        if (/[A-Z]/.test(password)) strength++;
+        
+        // Küçük harf kontrolü
+        if (/[a-z]/.test(password)) strength++;
+        
+        // Rakam kontrolü
+        if (/[0-9]/.test(password)) strength++;
+        
+        // Özel karakter kontrolü
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        
+        // Görsel geri bildirim
+        const strengthBar = document.createElement('div');
+        strengthBar.className = 'strength-bar';
+        strengthBar.style.width = (strength * 20) + '%';
+        
+        let strengthText = '';
+        let strengthColor = '';
+        
+        switch(strength) {
+            case 1:
+                strengthText = 'Çok Zayıf';
+                strengthColor = '#ff4444';
+                break;
+            case 2:
+                strengthText = 'Zayıf';
+                strengthColor = '#ffbb33';
+                break;
+            case 3:
+                strengthText = 'Orta';
+                strengthColor = '#ffbb33';
+                break;
+            case 4:
+                strengthText = 'Güçlü';
+                strengthColor = '#00C851';
+                break;
+            case 5:
+                strengthText = 'Çok Güçlü';
+                strengthColor = '#007E33';
+                break;
+            default:
+                strengthText = 'Şifre Giriniz';
+                strengthColor = '#e5e7eb';
+        }
+        
+        // Şifre gücü göstergesi
+        let strengthIndicator = this.parentElement.querySelector('.strength-indicator');
+        if (!strengthIndicator) {
+            strengthIndicator = document.createElement('div');
+            strengthIndicator.className = 'strength-indicator';
+            this.parentElement.appendChild(strengthIndicator);
+        }
+        
+        strengthIndicator.innerHTML = `
+            <div class="strength-bar-container">
+                <div class="strength-bar" style="width: ${strength * 20}%; background-color: ${strengthColor}"></div>
+            </div>
+            <span class="strength-text" style="color: ${strengthColor}">${strengthText}</span>
+        `;
+    });
+
+    // Form gönderimi öncesi son kontroller
+    form.addEventListener('submit', function(e) {
+        const phone = phoneInput.value.replace(/\D/g, '');
+        const password = passwordInput.value;
+        let hasError = false;
+        let errorMessage = [];
+
+        // Telefon numarası uzunluk kontrolü
+        if (phone.length !== 10) {
+            errorMessage.push('Telefon numarası 10 haneli olmalıdır');
+            hasError = true;
+        }
+
+        // Şifre güçlülük kontrolü
+        if (password.length < 8) {
+            errorMessage.push('Şifre en az 8 karakter olmalıdır');
+            hasError = true;
+        }
+        if (!/[A-Z]/.test(password)) {
+            errorMessage.push('Şifre en az bir büyük harf içermelidir');
+            hasError = true;
+        }
+        if (!/[a-z]/.test(password)) {
+            errorMessage.push('Şifre en az bir küçük harf içermelidir');
+            hasError = true;
+        }
+        if (!/[0-9]/.test(password)) {
+            errorMessage.push('Şifre en az bir rakam içermelidir');
+            hasError = true;
+        }
+
+        if (hasError) {
+            e.preventDefault();
+            alert(errorMessage.join('\\n'));
+        }
+    });
+});
+</script>
 {% endblock %}

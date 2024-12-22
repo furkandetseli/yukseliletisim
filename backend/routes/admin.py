@@ -56,8 +56,17 @@ def dashboard():
     # İstatistikler
     total_users = User.query.count()
     total_products = Product.query.count()
+    active_products = Product.query.filter_by(is_active=True).count()
     low_stock_count = Product.query.filter(Product.stock < 10).count()
-    pending_orders = 0  # Sipariş sistemi eklendiğinde güncellenecek
+    
+    # Bu ayki yeni kullanıcılar
+    current_month = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    new_users_this_month = User.query.filter(User.created_at >= current_month).count()
+    
+    # Günlük sipariş sayısı
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    daily_orders = Order.query.filter(Order.created_at >= today).count()
+    pending_orders = Order.query.filter_by(status='Beklemede').count()
     
     # Son eklenen ürünler
     latest_products = Product.query.order_by(Product.created_at.desc()).limit(5).all()
@@ -65,14 +74,20 @@ def dashboard():
     # Son kayıt olan kullanıcılar
     latest_users = User.query.order_by(User.created_at.desc()).limit(5).all()
     
+    # Son siparişler
+    latest_orders = Order.query.order_by(Order.created_at.desc()).limit(5).all()
+    
     return render_template('admin/dashboard.html',
                          total_users=total_users,
                          total_products=total_products,
+                         active_products=total_products,  # Geçici olarak total_products kullanıyoruz
                          low_stock_count=low_stock_count,
+                         new_users_this_month=new_users_this_month,
+                         daily_orders=daily_orders,
                          pending_orders=pending_orders,
                          latest_products=latest_products,
-                         latest_users=latest_users)
-
+                         latest_users=latest_users,
+                         latest_orders=latest_orders)
 
 @admin_bp.route('/products')
 @login_required
@@ -623,19 +638,18 @@ def allowed_file(filename):
 @admin_required
 def brands():
     brands = Brand.query.order_by(Brand.name).all()
-    return render_template('admin/brands/index.html', brands=brands)
+    return render_template('admin/brands.html', brands=brands)
 
-# Sadece API endpoint'i olarak kullanılacak olan marka ekleme
-@admin_bp.route('/api/brands/add', methods=['POST'])
+@admin_bp.route('/brands/create', methods=['POST'])
 @login_required
 @admin_required
-def api_add_brand():
+def create_brand():
     try:
         data = request.get_json()
         name = data.get('name')
         
         if not name:
-            return jsonify({'success': False, 'message': 'Marka adı gerekli'}), 400
+            return jsonify({'success': False, 'message': 'Marka adı gerekli'})
             
         # Marka zaten var mı kontrol et
         existing_brand = Brand.query.filter_by(name=name).first()
@@ -649,57 +663,64 @@ def api_add_brand():
         
         return jsonify({
             'success': True,
-            'brand': {'id': brand.id, 'name': brand.name},
             'message': 'Marka başarıyla eklendi'
         })
         
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'message': str(e)}), 500
+        return jsonify({'success': False, 'message': str(e)})
 
-# Form üzerinden marka ekleme
-@admin_bp.route('/brands/create', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def create_brand():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        if not name:
-            flash('Marka adı gerekli', 'error')
-            return redirect(url_for('admin.brands'))
-            
-        try:
-            brand = Brand(name=name)
-            db.session.add(brand)
-            db.session.commit()
-            flash('Marka başarıyla eklendi', 'success')
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Marka eklenirken bir hata oluştu: {str(e)}', 'error')
-            
-        return redirect(url_for('admin.brands'))
-        
-    return render_template('admin/brands/form.html')
-
-@admin_bp.route('/brands/edit/<int:id>', methods=['GET', 'POST'])
+@admin_bp.route('/brands/edit/<int:id>', methods=['POST'])
 @login_required
 @admin_required
 def edit_brand(id):
-    brand = Brand.query.get_or_404(id)
-    
-    if request.method == 'POST':
-        name = request.form.get('name')
+    try:
+        brand = Brand.query.get_or_404(id)
+        data = request.get_json()
+        name = data.get('name')
+        
         if not name:
-            flash('Marka adı gerekli', 'error')
-            return redirect(url_for('admin.edit_brand', id=id))
-            
-        try:
-            brand.name = name
-            db.session.commit()
-            flash('Marka başarıyla güncellendi', 'success')
-            return redirect(url_for('admin.brands'))
-        except Exception as e:
-            db.session.rollback()
-            flash(f'Marka güncellenirken bir hata oluştu: {str(e)}', 'error')
-            
-    return render_template('admin/brands/form.html', brand=brand)
+            return jsonify({'success': False, 'message': 'Marka adı gerekli'})
+        
+        # Aynı isimde başka marka var mı kontrol et
+        existing_brand = Brand.query.filter(Brand.name == name, Brand.id != id).first()
+        if existing_brand:
+            return jsonify({'success': False, 'message': 'Bu marka adı zaten kullanılıyor'})
+        
+        brand.name = name
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Marka başarıyla güncellendi'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)})
+
+@admin_bp.route('/brands/delete/<int:id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_brand(id):
+    try:
+        brand = Brand.query.get_or_404(id)
+        
+        # Markaya ait ürün var mı kontrol et
+        if brand.products:
+            return jsonify({
+                'success': False,
+                'message': 'Bu markaya ait ürünler olduğu için silinemez'
+            }), 400
+        
+        db.session.delete(brand)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Marka başarıyla silindi'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500

@@ -1,0 +1,252 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Marka Yönetimi{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-left">
+        <h2>Markalar</h2>
+    </div>
+    <div class="header-right">
+        <button class="btn btn-primary" onclick="showAddBrandModal()">
+            <i class="fas fa-plus"></i> Yeni Marka Ekle
+        </button>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Marka Adı</th>
+                <th>Ürün Sayısı</th>
+                <th>Eklenme Tarihi</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for brand in brands %}
+            <tr>
+                <td>{{ brand.id }}</td>
+                <td>{{ brand.name }}</td>
+                <td>{{ brand.products|length }}</td>
+                <td>
+                    {% if brand.created_at %}
+                        {{ brand.created_at.strftime('%d.%m.%Y') }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button onclick="showEditBrandModal('{{ brand.id }}', '{{ brand.name }}')" 
+                                class="btn btn-sm btn-primary">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="confirmDeleteBrand('{{ brand.id }}')" 
+                                class="btn btn-sm btn-danger"
+                                {% if brand.products|length > 0 %}disabled{% endif %}
+                                title="{% if brand.products|length > 0 %}Bu markaya ait ürünler var{% else %}Markayı Sil{% endif %}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Yeni Marka Modalı -->
+<div id="brandModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Yeni Marka Ekle</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <form id="brandForm" onsubmit="handleBrandSubmit(event)">
+            <input type="hidden" id="brandId">
+            <div class="form-group">
+                <label for="brandName">Marka Adı</label>
+                <input type="text" id="brandName" name="name" class="form-control" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeBrandModal()">İptal</button>
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showAddBrandModal() {
+    document.getElementById('modalTitle').textContent = 'Yeni Marka Ekle';
+    document.getElementById('brandId').value = '';
+    document.getElementById('brandName').value = '';
+    document.getElementById('brandModal').style.display = 'block';
+}
+
+function showEditBrandModal(id, name) {
+    document.getElementById('modalTitle').textContent = 'Marka Düzenle';
+    document.getElementById('brandId').value = id;
+    document.getElementById('brandName').value = name;
+    document.getElementById('brandModal').style.display = 'block';
+}
+
+function closeBrandModal() {
+    document.getElementById('brandModal').style.display = 'none';
+}
+
+function handleBrandSubmit(event) {
+    event.preventDefault();
+    const brandId = document.getElementById('brandId').value;
+    const brandName = document.getElementById('brandName').value;
+    
+    if (!brandName.trim()) {
+        alert('Marka adı boş olamaz');
+        return;
+    }
+    
+    const url = brandId 
+        ? `/admin/brands/edit/${brandId}`
+        : '/admin/brands/create';
+        
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ name: brandName })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.message || 'Bir hata oluştu');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Bir hata oluştu');
+    });
+}
+
+function confirmDeleteBrand(brandId) {
+    if (confirm('Bu markayı silmek istediğinizden emin misiniz?')) {
+        fetch(`/admin/brands/delete/${brandId}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                throw new Error('Silme işlemi başarısız oldu');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Marka silinirken bir hata oluştu');
+        });
+    }
+}
+
+// Modal kapatma
+document.querySelector('.close-modal').onclick = closeBrandModal;
+window.onclick = function(event) {
+    if (event.target == document.getElementById('brandModal')) {
+        closeBrandModal();
+    }
+}
+</script>
+
+<style>
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.close-modal:hover {
+    color: #333;
+}
+
+.modal-footer {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: #1a237e;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(26,35,126,0.1);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+</style>
+{% endblock %}

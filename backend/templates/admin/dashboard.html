@@ -2,8 +2,6 @@
 
 {% block title %}Yönetim Paneli - Dashboard{% endblock %}
 
-{% block page_title %}Dashboard{% endblock %}
-
 {% block content %}
 <div class="dashboard-container">
     <!-- İstatistik Kartları -->
@@ -15,7 +13,7 @@
             <div class="stat-content">
                 <h3>Toplam Kullanıcı</h3>
                 <div class="value">{{ total_users }}</div>
-                <div class="stat-footer">Kayıtlı Kullanıcı</div>
+                <div class="stat-footer">Bu ay {{ new_users_this_month }} yeni kayıt</div>
             </div>
         </div>
 
@@ -26,7 +24,7 @@
             <div class="stat-content">
                 <h3>Toplam Ürün</h3>
                 <div class="value">{{ total_products }}</div>
-                <div class="stat-footer">Aktif Ürün</div>
+                <div class="stat-footer">{{ active_products }} aktif ürün</div>
             </div>
         </div>
 
@@ -37,7 +35,7 @@
             <div class="stat-content">
                 <h3>Stoğu Azalan</h3>
                 <div class="value">{{ low_stock_count }}</div>
-                <div class="stat-footer">10'dan Az Kalan Ürün</div>
+                <div class="stat-footer">10'dan az kalan ürün</div>
             </div>
         </div>
 
@@ -48,8 +46,44 @@
             <div class="stat-content">
                 <h3>Bekleyen Siparişler</h3>
                 <div class="value">{{ pending_orders }}</div>
-                <div class="stat-footer">Onay Bekleyen</div>
+                <div class="stat-footer">Günlük {{ daily_orders }} yeni sipariş</div>
             </div>
+        </div>
+    </section>
+
+    <!-- Hızlı İşlemler -->
+    <section class="content-section">
+        <div class="section-header">
+            <h2>Hızlı İşlemler</h2>
+        </div>
+        <div class="quick-actions">
+            <a href="{{ url_for('admin.add_product') }}" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <h3 class="action-title">Yeni Ürün Ekle</h3>
+            </a>
+            
+            <a href="{{ url_for('admin.orders') }}" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <i class="fas fa-shipping-fast"></i>
+                </div>
+                <h3 class="action-title">Siparişleri Yönet</h3>
+            </a>
+            
+            <a href="{{ url_for('admin.categories') }}" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <h3 class="action-title">Kategorileri Düzenle</h3>
+            </a>
+            
+            <a href="{{ url_for('admin.users') }}" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <h3 class="action-title">Kullanıcıları Yönet</h3>
+            </a>
         </div>
     </section>
 
@@ -58,7 +92,8 @@
         <div class="section-header">
             <h2>Son Eklenen Ürünler</h2>
             <a href="{{ url_for('admin.products') }}" class="btn btn-primary">
-                <i class="fas fa-list mr-2"></i>Tüm Ürünler
+                <i class="fas fa-list"></i>
+                Tüm Ürünler
             </a>
         </div>
         <div class="table-responsive">
@@ -79,7 +114,7 @@
                         <td>{{ product.category }}</td>
                         <td>{{ "%.2f"|format(product.price) }} TL</td>
                         <td>
-                            <span class="badge {{ 'badge-warning' if product.stock < 10 else 'badge-success' }}">
+                            <span class="badge {% if product.stock < 10 %}badge-warning{% else %}badge-success{% endif %}">
                                 {{ product.stock }}
                             </span>
                         </td>
@@ -91,48 +126,150 @@
         </div>
     </section>
 
-    <!-- Son Kayıt Olan Kullanıcılar -->
-    <section class="content-section users-section">
+    <!-- Son İşlemler -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Son Kayıt Olan Kullanıcılar -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2>Son Kayıt Olan Kullanıcılar</h2>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-primary">
+                    <i class="fas fa-users"></i>
+                    Tüm Kullanıcılar
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ad Soyad</th>
+                            <th>Email</th>
+                            <th>Kayıt Tarihi</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in latest_users %}
+                        <tr>
+                            <td>{{ user.first_name }} {{ user.last_name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.created_at.strftime('%d.%m.%Y') }}</td>
+                            <td>
+                                <span class="badge {% if user.is_active %}badge-success{% else %}badge-danger{% endif %}">
+                                    {{ 'Aktif' if user.is_active else 'Pasif' }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Son Siparişler -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2>Son Siparişler</h2>
+                <a href="{{ url_for('admin.orders') }}" class="btn btn-primary">
+                    <i class="fas fa-shopping-cart"></i>
+                    Tüm Siparişler
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Sipariş No</th>
+                            <th>Müşteri</th>
+                            <th>Tutar</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in latest_orders %}
+                        <tr>
+                            <td>#{{ order.id }}</td>
+                            <td>{{ order.user.first_name }} {{ order.user.last_name }}</td>
+                            <td>{{ "%.2f"|format(order.total_amount) }} TL</td>
+                            <td>
+                                {% set status_classes = {
+                                    'Beklemede': 'badge-warning',
+                                    'Onaylandı': 'badge-success',
+                                    'Kargoda': 'badge-info',
+                                    'Tamamlandı': 'badge-success',
+                                    'İptal': 'badge-danger'
+                                } %}
+                                <span class="badge {{ status_classes[order.status] }}">
+                                    {{ order.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Aktivite Geçmişi -->
+    <section class="content-section activity-log">
         <div class="section-header">
-            <h2>Son Kayıt Olan Kullanıcılar</h2>
-            <a href="{{ url_for('admin.users') }}" class="btn btn-primary">
-                <i class="fas fa-users mr-2"></i>Tüm Kullanıcılar
-            </a>
+            <h2>Son Aktiviteler</h2>
         </div>
-        <div class="table-responsive">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Ad Soyad</th>
-                        <th>Email</th>
-                        <th>Kayıt Tarihi</th>
-                        <th>Son Giriş</th>
-                        <th>Durum</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in latest_users %}
-                    <tr>
-                        <td>{{ user.first_name }} {{ user.last_name }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.created_at.strftime('%d.%m.%Y') }}</td>
-                        <td>
-                            {% if user.last_login %}
-                            {{ user.last_login.strftime('%d.%m.%Y %H:%M') }}
-                            {% else %}
-                            Henüz Giriş Yapmadı
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="badge {{ 'badge-success' if user.is_active else 'badge-danger' }}">
-                                {{ 'Aktif' if user.is_active else 'Pasif' }}
-                            </span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="activity-list">
+            {% for activity in recent_activities %}
+            {% set activity_styles = {
+                'product': 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                'order': 'linear-gradient(135deg, #10b981, #059669)',
+                'user': 'linear-gradient(135deg, #f59e0b, #d97706)',
+                'category': 'linear-gradient(135deg, #ef4444, #dc2626)'
+            } %}
+            {% set activity_icons = {
+                'product': 'box',
+                'order': 'shopping-cart',
+                'user': 'user',
+                'category': 'folder'
+            } %}
+            <div class="activity-item">
+                <div class="activity-icon" style="background: #ffcc00;">
+                    <i class="fas fa-{{ activity_icons[activity.type] }}"></i>
+                </div>
+                <div class="activity-content">
+                    <h4>{{ activity.description }}</h4>
+                    <span class="activity-time">{{ activity.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </section>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // İstatistik kartları için animasyon
+    document.querySelectorAll('.stat-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Grafik ve tablo verileri için otomatik yenileme
+    function refreshDashboardData() {
+        fetch('/admin/api/dashboard-data')
+            .then(response => response.json())
+            .then(data => {
+                // Verileri güncelle
+                updateStats(data.stats);
+                updateTables(data.tables);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Her 5 dakikada bir verileri yenile
+    setInterval(refreshDashboardData, 300000);
+</script>
 {% endblock %}

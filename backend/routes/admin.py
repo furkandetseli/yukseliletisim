@@ -190,65 +190,117 @@ def add_product():
 @admin_required
 def edit_product(id):
     product = Product.query.get_or_404(id)
-
+    
     if request.method == 'POST':
         try:
+            # Form verilerini al
             name = request.form.get('name')
-            category_id = request.form.get('category_id')
             brand_id = request.form.get('brand_id')
+            category_id = request.form.get('category_id')
             price = request.form.get('price')
             stock = request.form.get('stock')
             description = request.form.get('description', '')
-
+            
+            # Validasyon
             errors = []
             if not name:
-                errors.append("Ürün adı gerekli.")
-            if not category_id:
-                errors.append("Kategori seçimi gerekli.")
+                errors.append("Ürün adı gerekli")
             if not brand_id:
-                errors.append("Marka seçimi gerekli.")
+                errors.append("Marka seçimi gerekli")
+            if not category_id:
+                errors.append("Kategori seçimi gerekli")
             if not price:
-                errors.append("Fiyat gerekli.")
+                errors.append("Fiyat gerekli")
             if not stock:
-                errors.append("Stok miktarı gerekli.")
-
+                errors.append("Stok adedi gerekli")
+                
+            # Görsel kontrolü - yeni ürünse veya mevcut görseli yoksa zorunlu
+            images = request.files.getlist('images')
+            has_images = any(img.filename for img in images)
+            if not has_images and not product.images:
+                errors.append("En az bir ürün görseli gerekli")
+            
             if errors:
                 flash("\n".join(errors), 'error')
                 return redirect(url_for('admin.edit_product', id=id))
 
+            # Ürün bilgilerini güncelle
             product.name = name
-            product.category_id = int(category_id)
             product.brand_id = int(brand_id)
+            product.category_id = int(category_id)
             product.price = float(price)
             product.stock = int(stock)
             product.description = description
 
-            image = request.files.get('image')
-            if image and image.filename:
-                if product.image:
-                    old_image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], product.image)
-                    if os.path.exists(old_image_path):
-                        os.remove(old_image_path)
+            # Yeni görseller varsa ekle
+            images = request.files.getlist('images')
+            if any(img.filename for img in images):
+                upload_folder = current_app.config['UPLOAD_FOLDER']
+                os.makedirs(upload_folder, exist_ok=True)
 
-                image_filename = save_product_image(image)
-                if image_filename:
-                    product.image = image_filename
+                # Yeni görselleri kaydet
+                for index, image in enumerate(images):
+                    if image and image.filename:
+                        filename = secure_filename(f"{product.stock_code}_{len(product.images) + index}_{image.filename}")
+                        image_path = os.path.join(upload_folder, filename)
+                        image.save(image_path)
+
+                        product_image = ProductImage(
+                            product_id=product.id,
+                            image_path=filename,
+                            is_primary=(index == 0 and not product.images)  # Sadece hiç görsel yoksa ilk görsel ana görsel olsun
+                        )
+                        db.session.add(product_image)
+
+            # Silinecek görseller
+            deleted_images = request.form.getlist('delete_images')
+            if deleted_images:
+                for image_id in deleted_images:
+                    image = ProductImage.query.get(int(image_id))
+                    if image and image.product_id == product.id:
+                        # Dosyayı sil
+                        image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], image.image_path)
+                        if os.path.exists(image_path):
+                            os.remove(image_path)
+                        db.session.delete(image)
 
             db.session.commit()
             flash('Ürün başarıyla güncellendi.', 'success')
             return redirect(url_for('admin.products'))
 
-        except ValueError as ve:
-            db.session.rollback()
-            flash(f'Geçersiz giriş: {str(ve)}', 'error')
         except Exception as e:
             db.session.rollback()
             flash(f'Ürün güncellenirken bir hata oluştu: {str(e)}', 'error')
+            return redirect(url_for('admin.edit_product', id=id))
 
-    # Markalar ve kategoriler sorgulanıyor
-    categories = Category.query.order_by(Category.name).all()
+    # GET isteği için
     brands = Brand.query.order_by(Brand.name).all()
-    return render_template('admin/product_form.html', product=product, categories=categories, brands=brands)
+    categories = Category.query.order_by(Category.name).all()
+    return render_template('admin/product_form.html',
+                         product=product,
+                         brands=brands,
+                         categories=categories)
+
+@admin_bp.route('/products/delete-image/<int:image_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_product_image(image_id):
+    try:
+        image = ProductImage.query.get_or_404(image_id)
+        
+        # Görsel dosyasını sil
+        image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], image.image_path)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+            
+        # Veritabanından sil
+        db.session.delete(image)
+        db.session.commit()
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)})
 
 
 

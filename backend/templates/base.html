@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/product.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -77,28 +79,31 @@
 
             <!-- Kullanıcı Menüsü -->
             <div class="user-menu">
-                <a href="{{ url_for('index') }}" class="menu-item">
-                    <i class="far fa-heart"></i>
-                    <span>Favoriler</span>
-                </a>
-                
-                {% if current_user.is_authenticated %}
-                <a href="{{ url_for('index') }}" class="menu-item">
-                    <i class="far fa-user"></i>
-                    <span>Hesabım</span>
-                </a>
-                {% else %}
-                <a href="{{ url_for('login') }}" class="menu-item">
-                    <i class="far fa-user"></i>
-                    <span>Giriş Yap</span>
-                </a>
-                {% endif %}
+                <!-- Mobil Menü Butonu -->
+                <button class="mobile-menu-button" id="mobileMenuButton">
+                    <i class="fas fa-bars"></i>
+                </button>
 
-                <a href="{{ url_for('cart') }}" class="menu-item cart">
+                <a href="#" class="menu-item">
+                    <i class="far fa-heart"></i>
+                    <span>Favorilerim</span>
+                </a>
+                {% if current_user.is_authenticated %}
+                    <a href="#" class="menu-item">
+                        <i class="far fa-user"></i>
+                        <span>Hesabım</span>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="menu-item">
+                        <i class="far fa-user"></i>
+                        <span>Giriş Yap</span>
+                    </a>
+                {% endif %}
+                <a href="{{ url_for('cart') }}" class="menu-item">
                     <i class="fas fa-shopping-cart"></i>
                     <span>Sepetim</span>
                     {% if cart_count and cart_count > 0 %}
-                    <span class="cart-count">{{ cart_count }}</span>
+                        <div class="cart-count">{{ cart_count }}</div>
                     {% endif %}
                 </a>
             </div>
@@ -111,13 +116,6 @@
     <nav class="main-nav">
         <div class="container">
             <div class="nav-wrapper">
-                <!-- Mobil Menu Butonu -->
-                <div class="mobile-nav-toggle">
-                    <button id="menuToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-                
                 <!-- Ana Menu -->
                 <ul class="nav-list">
                     {% for category in categories %}
@@ -160,63 +158,6 @@
                     {% endfor %}
                 </ul>
             </div>
-     
-            <!-- Mobil Menu -->
-            <div class="mobile-menu" id="mobileMenu">
-                <div class="mobile-menu-header">
-                    <h3>Kategoriler</h3>
-                    <button class="close-menu">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="mobile-menu-content">
-                    <ul class="mobile-nav-list">
-                        {% for category in categories %}
-                        <li class="mobile-nav-item">
-                            <div class="mobile-nav-header">
-                                <a href="{{ url_for('category_products', category_name=category.name) }}">
-                                    {{ category.name }}
-                                </a>
-                                {% if category.children.count() > 0 %}
-                                <button class="toggle-submenu">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                {% endif %}
-                            </div>
-                            {% if category.children.count() > 0 %}
-                            <ul class="mobile-submenu">
-                                {% for subcategory in category.children %}
-                                <li>
-                                    <div class="submenu-header">
-                                        <a href="{{ url_for('category_products', category_name=subcategory.name) }}">
-                                            {{ subcategory.name }}
-                                        </a>
-                                        {% if subcategory.children.count() > 0 %}
-                                        <button class="toggle-submenu">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                        {% endif %}
-                                    </div>
-                                    {% if subcategory.children.count() > 0 %}
-                                    <ul class="mobile-submenu-l2">
-                                        {% for sub_sub in subcategory.children %}
-                                        <li>
-                                            <a href="{{ url_for('category_products', category_name=sub_sub.name) }}">
-                                                {{ sub_sub.name }}
-                                            </a>
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                    {% endif %}
-                                </li>
-                                {% endfor %}
-                            </ul>
-                            {% endif %}
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
         </div>
      </nav>
 
@@ -229,9 +170,20 @@
             </button>
         </div>
         <div class="mobile-menu-content">
-            <ul class="mobile-nav-list">
+            <!-- Kullanıcı Bilgisi -->
+            <div class="user-info">
+                {% if current_user.is_authenticated %}
+                    <p>Merhaba, {{ current_user.first_name }}</p>
+                    <a href="{{ url_for('logout') }}">Çıkış Yap</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Giriş Yap / Üye Ol</a>
+                {% endif %}
+            </div>
+
+            <!-- Mobil Navigasyon -->
+            <nav class="mobile-nav">
                 {% for category in categories %}
-                <li class="mobile-nav-item">
+                <div class="mobile-nav-item">
                     <div class="mobile-nav-header">
                         <a href="{{ url_for('category_products', category_name=category.name) }}">
                             {{ category.name }}
@@ -243,37 +195,89 @@
                         {% endif %}
                     </div>
                     {% if category.children.count() > 0 %}
-                    <ul class="mobile-submenu">
+                    <div class="mobile-submenu">
                         {% for subcategory in category.children %}
-                        <li>
-                            <div class="submenu-header">
-                                <a href="{{ url_for('category_products', category_name=subcategory.name) }}">
-                                    {{ subcategory.name }}
-                                </a>
-                                {% if subcategory.children.count() > 0 %}
-                                <button class="toggle-submenu">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                {% endif %}
-                            </div>
-                            {% if subcategory.children.count() > 0 %}
-                            <ul class="mobile-submenu-l2">
-                                {% for sub_sub in subcategory.children %}
-                                <li>
-                                    <a href="{{ url_for('category_products', category_name=sub_sub.name) }}">
-                                        {{ sub_sub.name }}
-                                    </a>
-                                </li>
-                                {% endfor %}
-                            </ul>
-                            {% endif %}
-                        </li>
+                        <a href="{{ url_for('category_products', category_name=subcategory.name) }}">
+                            {{ subcategory.name }}
+                        </a>
                         {% endfor %}
-                    </ul>
+                    </div>
                     {% endif %}
-                </li>
+                </div>
                 {% endfor %}
-            </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Mobil Arama -->
+    <div class="mobile-search" id="mobileSearch">
+        <div class="mobile-search-header">
+            <button class="close-search">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <form action="{{ url_for('search') }}" method="GET" class="mobile-search-form">
+                <input type="text" 
+                    name="q" 
+                    class="mobile-search-input" 
+                    placeholder="Ne aramıştınız? (örn. iPhone 13 kılıf, AirPods...)">
+                <button type="submit" class="mobile-search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        <div class="mobile-search-content">
+            <div class="popular-searches">
+                <h4>Popüler Aramalar</h4>
+                <div class="search-tags">
+                    <a href="#">iPhone 13 Kılıf</a>
+                    <a href="#">AirPods</a>
+                    <a href="#">Samsung Şarj Aleti</a>
+                    <a href="#">Powerbank</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="#" class="bottom-nav-item" id="searchToggle">
+            <div class="bottom-search-bar">
+                <i class="fas fa-search"></i>
+                <span>Ne aramıştınız?</span>
+            </div>
+        </a>
+    </nav>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="{{ url_for('index') }}" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Anasayfa</span>
+        </a>
+        <a href="{{ url_for('cart') }}" class="bottom-nav-item">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Sepetim</span>
+            {% if cart_count and cart_count > 0 %}
+                <span class="bottom-nav-badge">{{ cart_count }}</span>
+            {% endif %}
+        </a>
+        <a href="#" class="bottom-nav-item">
+            <i class="far fa-heart"></i>
+            <span>Favoriler</span>
+        </a>
+        <a href="{{ url_for('login') }}" class="bottom-nav-item">
+            <i class="far fa-user"></i>
+            <span>Hesabım</span>
+        </a>
+    </nav>
+
+    <!-- Mobil Arama -->
+    <div class="mobile-search" id="mobileSearch">
+        <div class="mobile-search-header">
+            <button class="close-search">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <input type="text" class="mobile-search-input" placeholder="Ürün, kategori ara...">
         </div>
     </div>
     <!-- Ana İçerik -->

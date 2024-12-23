@@ -1,4 +1,5 @@
 # app.py
+from waitress import serve
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
 import os
@@ -430,4 +431,4 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    serve(app, host="0.0.0.0", port=8000) 

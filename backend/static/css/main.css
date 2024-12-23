@@ -1459,3 +1459,96 @@ body.menu-open {
         margin-top: 0;
     }
 }
+/* Logo Container */
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    min-width: 220px;
+    height: 80px;
+    transition: all 0.3s ease;
+}
+
+.logo a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+}
+
+.logo img {
+    width: auto;
+    height: 70px;
+    max-width: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover img {
+    transform: scale(1.02);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1200px) {
+    .logo {
+        min-width: 200px;
+        height: 70px;
+    }
+    
+    .logo img {
+        height: 60px;
+    }
+}
+
+@media (max-width: 992px) {
+    .logo {
+        min-width: 180px;
+        height: 65px;
+    }
+    
+    .logo img {
+        height: 55px;
+    }
+}
+
+@media (max-width: 768px) {
+    .logo {
+        min-width: 160px;
+        height: 60px;
+        padding: 8px 0;
+    }
+    
+    .logo img {
+        height: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        min-width: 140px;
+        height: 50px;
+        padding: 5px 0;
+    }
+    
+    .logo img {
+        height: 40px;
+    }
+}
+
+/* Header Container Adjustments */
+.main-header .container {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding: 10px 20px;
+}
+
+@media (max-width: 768px) {
+    .main-header .container {
+        gap: 15px;
+        padding: 5px 15px;
+    }
+}

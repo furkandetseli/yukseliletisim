@@ -137,8 +137,8 @@ if __name__ == '__main__':
         return '''<header>
     <div class="top-bar">
         <div class="contact-info">
-            <a href="tel:05305600735"><i class="fas fa-phone"></i> 0530 560 0735</a>
-            <a href="https://wa.me/05305600735"><i class="fab fa-whatsapp"></i> 0530 560 0735</a>
+            <a href="tel:05305600735"><i class="fas fa-phone"></i> 0539 586 2718</a>
+            <a href="https://wa.me/05305600735"><i class="fab fa-whatsapp"></i> 0539 586 2718</a>
             <a href="mailto:info@yukseliletisim.com"><i class="fas fa-envelope"></i> info@yukseliletisim.com</a>
         </div>
         <div class="top-menu">

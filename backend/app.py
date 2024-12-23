@@ -365,6 +365,48 @@ def create_app():
     def product_images(filename):
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+    @app.route('/profile', methods=['GET', 'POST'])
+    @login_required
+    def profile():
+        if request.method == 'POST':
+            try:
+                # Kişisel bilgi güncellemesi
+                current_user.first_name = request.form.get('first_name')
+                current_user.last_name = request.form.get('last_name')
+                current_user.email = request.form.get('email')
+                phone = request.form.get('phone')
+                phone = phone.replace(' ', '') if phone else None
+                current_user.phone = phone
+                
+        
+                # Şifre değişikliği kontrolü
+                current_password = request.form.get('current_password')
+                new_password = request.form.get('new_password')
+                confirm_password = request.form.get('confirm_password')
+                
+                if current_password and new_password and confirm_password:
+                    if not current_user.check_password(current_password):
+                        flash('Mevcut şifre hatalı', 'error')
+                        return redirect(url_for('profile'))
+                        
+                    if new_password != confirm_password:
+                        flash('Yeni şifreler eşleşmiyor', 'error')
+                        return redirect(url_for('profile'))
+                        
+                    current_user.set_password(new_password)
+                
+                db.session.commit()
+                flash('Bilgileriniz başarıyla güncellendi', 'success')
+                return redirect(url_for('profile'))
+                
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Bir hata oluştu: {str(e)}', 'error')
+                return redirect(url_for('profile'))
+    
+        return render_template('profile.html')
+
+
     # Helper functions
     def get_cart_count():
         if current_user.is_authenticated:

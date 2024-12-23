@@ -169,17 +169,8 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
+        
         <div class="mobile-menu-content">
-            <!-- Kullanıcı Bilgisi -->
-            <div class="user-info">
-                {% if current_user.is_authenticated %}
-                    <p>Merhaba, {{ current_user.first_name }}</p>
-                    <a href="{{ url_for('logout') }}">Çıkış Yap</a>
-                {% else %}
-                    <a href="{{ url_for('login') }}">Giriş Yap / Üye Ol</a>
-                {% endif %}
-            </div>
-
             <!-- Mobil Navigasyon -->
             <nav class="mobile-nav">
                 {% for category in categories %}

@@ -115,22 +115,22 @@ class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     stock_code = db.Column(db.String(10), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
+    slug = db.Column(db.String(200), unique=True)
     price = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text)
     brand_id = db.Column(db.Integer, db.ForeignKey('brand.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     stock = db.Column(db.Integer, default=0)
-    is_active = db.Column(db.Boolean, default=True)  # Yeni eklenen alan
+    is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    slug = db.Column(db.String(200), unique=True, 
-                    name='uq_product_slug')  # unique constraint için isim verdik
     
     # İlişkiler
     brand = db.relationship('Brand', back_populates='products')
-    category_ref = db.relationship('Category', backref='products')
     images = db.relationship('ProductImage', backref='product', lazy=True, cascade='all, delete-orphan')
 
     def __init__(self, *args, **kwargs):
+        if 'stock_code' not in kwargs:
+            kwargs['stock_code'] = self.generate_stock_code()
         if 'slug' not in kwargs:
             kwargs['slug'] = slugify(kwargs.get('name', ''))
         super(Product, self).__init__(*args, **kwargs)

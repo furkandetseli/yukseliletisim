@@ -102,103 +102,76 @@ def products():
 @login_required
 @admin_required
 def add_product():
-   if request.method == 'POST':
-       try:
-           # Form verilerini al
-           name = request.form.get('name')
-           brand_id = request.form.get('brand_id')
-           category_id = request.form.get('category_id')  # Değiştirildi
-           price = request.form.get('price')
-           stock = request.form.get('stock')
-           description = request.form.get('description', '')
-           
-           # Debug için verileri yazdır
-           print(f"""
-           Name: {name}
-           Brand ID: {brand_id}
-           Category ID: {category_id}
-           Price: {price}
-           Stock: {stock}
-           Description: {description}
-           """)
+    if request.method == 'POST':
+        try:
+            # Form verilerini al
+            name = request.form.get('name')
+            brand_id = request.form.get('brand_id')
+            category_id = request.form.get('category_id')
+            price = request.form.get('price')
+            stock = request.form.get('stock')
+            description = request.form.get('description', '')
+            
+            # Validasyon
+            if not name:
+                flash('Ürün adı gereklidir', 'error')
+                return redirect(url_for('admin.add_product'))
+            if not brand_id:
+                flash('Marka seçimi gereklidir', 'error')
+                return redirect(url_for('admin.add_product'))
+            if not price:
+                flash('Fiyat gereklidir', 'error')
+                return redirect(url_for('admin.add_product'))
 
-           # Her bir alanın varlığını ayrı ayrı kontrol et
-           errors = []
-           if not name:
-               errors.append("Ürün adı gerekli")
-           if not brand_id:
-               errors.append("Marka seçimi gerekli")
-           if not category_id:
-               errors.append("Kategori seçimi gerekli")
-           if not price:
-               errors.append("Fiyat gerekli")
-           if not stock:
-               errors.append("Stok adedi gerekli")
-           
-           # Hata varsa göster
-           if errors:
-               flash("\n".join(errors), 'error')
-               return redirect(url_for('admin.add_product'))
+            # Ürün oluştur
+            product = Product(
+                name=name,
+                brand_id=int(brand_id),
+                category_id=int(category_id) if category_id else None,
+                price=float(price),
+                stock=int(stock) if stock else 0,
+                description=description,
+                is_active=True
+            )
+            
+            db.session.add(product)
+            db.session.flush()  # ID almak için
 
-           # Ürün oluştur
-           product = Product(
-               name=name,
-               brand_id=int(brand_id),
-               category_id=int(category_id),
-               price=float(price),
-               stock=int(stock),
-               description=description,
-               stock_code = Product().generate_stock_code()
-           )
-           
-           db.session.add(product)
-           db.session.flush()  # ID almak için
+            # Görselleri işle
+            images = request.files.getlist('images')
+            
+            if images and any(img.filename for img in images):
+                upload_folder = current_app.config['UPLOAD_FOLDER']
+                os.makedirs(upload_folder, exist_ok=True)
 
-           # Görselleri işle
-           images = request.files.getlist('images')
-           
-           if not images or not any(img.filename for img in images):
-               raise ValueError("En az bir ürün görseli gerekli")
+                for index, image in enumerate(images):
+                    if image and image.filename:
+                        filename = secure_filename(f"{product.stock_code}_{index}_{image.filename}")
+                        image_path = os.path.join(upload_folder, filename)
+                        image.save(image_path)
 
-           # Görsel klasörü kontrol ve oluşturma
-           upload_folder = current_app.config['UPLOAD_FOLDER']
-           os.makedirs(upload_folder, exist_ok=True)
+                        product_image = ProductImage(
+                            product_id=product.id,
+                            image_path=filename,
+                            is_primary=(index == 0)  # İlk görsel ana görsel
+                        )
+                        db.session.add(product_image)
 
-           # Görselleri kaydet
-           for index, image in enumerate(images):
-               if image and image.filename:
-                   filename = secure_filename(f"{product.stock_code}_{index}_{image.filename}")
-                   image_path = os.path.join(upload_folder, filename)
-                   image.save(image_path)
+            db.session.commit()
+            flash('Ürün başarıyla eklendi.', 'success')
+            return redirect(url_for('admin.products'))
 
-                   product_image = ProductImage(
-                       product_id=product.id,
-                       image_path=filename,
-                       is_primary=(index == 0)  # İlk görsel ana görsel
-                   )
-                   db.session.add(product_image)
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Ürün eklenirken bir hata oluştu: {str(e)}', 'error')
+            return redirect(url_for('admin.add_product'))
 
-           # Tüm işlemleri kaydet
-           db.session.commit()
-           flash('Ürün başarıyla eklendi.', 'success')
-           return redirect(url_for('admin.products'))
-
-       except ValueError as e:
-           db.session.rollback()
-           flash(str(e), 'error')
-           return redirect(url_for('admin.add_product'))
-       except Exception as e:
-           db.session.rollback()
-           print(f"Error adding product: {str(e)}")  # Debug için
-           flash(f'Ürün eklenirken bir hata oluştu: {str(e)}', 'error')
-           return redirect(url_for('admin.add_product'))
-
-   # GET request için
-   brands = Brand.query.order_by(Brand.name).all()
-   categories = Category.query.order_by(Category.name).all()
-   return render_template('admin/product_form.html',
-                        brands=brands,
-                        categories=categories)
+    # GET request için
+    brands = Brand.query.order_by(Brand.name).all()
+    categories = Category.query.order_by(Category.name).all()
+    return render_template('admin/product_form.html',
+                         brands=brands,
+                         categories=categories)
 
 @admin_bp.route('/products/edit/<int:id>', methods=['GET', 'POST'])
 @login_required

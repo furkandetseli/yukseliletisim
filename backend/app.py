@@ -431,4 +431,12 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    serve(app, host="0.0.0.0", port=8000) 
+    serve(app, 
+    host='0.0.0.0', 
+    port=8000,
+    threads=4,
+    url_scheme='https',
+    connection_limit=1000,
+    cleanup_interval=30,
+    channel_timeout=30
+)

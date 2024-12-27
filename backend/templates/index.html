@@ -20,139 +20,179 @@
 
         <!-- Slider Noktaları -->
         <div class="slider-dots">
-            <span class="dot active"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
+            <button class="dot active"></button>
+            <button class="dot"></button>
+            <button class="dot"></button>
         </div>
 
         <!-- Slider Okları -->
-        <button class="slider-arrow prev">&lt;</button>
-        <button class="slider-arrow next">&gt;</button>
+        <button class="slider-nav prev">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="slider-nav next">
+            <i class="fas fa-chevron-right"></i>
+        </button>
     </div>
 </section>
 
 <!-- Öne Çıkan Ürünler -->
-<section class="featured-products" id="featured">
+<section class="product-slider-section">
     <div class="container">
         <div class="section-header">
             <h2>Öne Çıkan Ürünler</h2>
             <a href="{{ url_for('admin.products') }}" class="view-all">Tümünü Gör</a>
         </div>
-        <div class="product-grid">
-            {% for product in featured_products %}
-            <div class="product-card">
-                <a href="{{ url_for('product_detail', slug=product.slug) }}" class="product-link">
-                    <div class="product-image">
-                        {% if product.images and product.images[0] %}
-                            <img src="{{ url_for('static', filename='images/products/' + product.images[0].image_path) }}"
-                                 alt="{{ product.name }}"
-                                 loading="lazy">
-                        {% else %}
-                            <div class="no-image">
-                                <i class="fas fa-image"></i>
+        
+        <div class="product-slider">
+            <button class="slider-nav prev" onclick="moveSlider('featured', -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <div class="slider-container" id="featured-slider">
+                <div class="slider-track">
+                    {% for product in featured_products %}
+                    <div class="product-card">
+                        <a href="{{ url_for('product_detail', slug=product.slug) }}" class="product-link">
+                            <div class="product-image">
+                                {% if product.images and product.images[0] %}
+                                    <img src="{{ url_for('static', filename='images/products/' + product.images[0].image_path) }}"
+                                         alt="{{ product.name }}"
+                                         loading="lazy">
+                                {% else %}
+                                    <div class="no-image">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if product.stock == 0 %}
+                                <div class="stock-badge out">Stokta Yok</div>
+                                {% elif product.stock <= 5 %}
+                                <div class="stock-badge limited">Sınırlı Stok</div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                        
-                        {% if product.stock == 0 %}
-                            <div class="stock-badge out">Stokta Yok</div>
-                        {% elif product.stock <= 5 %}
-                            <div class="stock-badge limited">Sınırlı Stok</div>
-                        {% endif %}
-                    </div>
 
-                    <div class="product-info">
-                        {% if product.brand %}
-                            <div class="brand">{{ product.brand.name }}</div>
-                        {% endif %}
-                        
-                        <div class="product-title">{{ product.name }}</div>
-                        
-                        <div class="price-container">
-                            {% if product.old_price and product.old_price > product.price %}
-                                <div class="old-price">{{ "%.2f"|format(product.old_price) }} TL</div>
-                                <div class="discount">-%{{ ((product.old_price - product.price) / product.old_price * 100)|round|int }}</div>
-                            {% endif %}
-                            <div class="current-price">{{ "%.2f"|format(product.price) }} TL</div>
-                        </div>
+                            <div class="product-info">
+                                {% if product.brand %}
+                                <div class="brand">{{ product.brand.name }}</div>
+                                {% endif %}
+                                
+                                <div class="product-title">{{ product.name }}</div>
+                                
+                                <div class="price-container">
+                                    {% if product.old_price and product.old_price > product.price %}
+                                    <div class="old-price">{{ "%.2f"|format(product.old_price) }} TL</div>
+                                    <div class="discount">-%{{ ((product.old_price - product.price) / product.old_price * 100)|round|int }}</div>
+                                    {% endif %}
+                                    <div class="current-price">{{ "%.2f"|format(product.price) }} TL</div>
+                                </div>
 
-                        {% if product.stock > 0 %}
-                            <button class="add-to-cart-btn" data-product-id="{{ product.id }}">
-                                <i class="fas fa-shopping-cart"></i>
-                                Sepete Ekle
-                            </button>
-                        {% else %}
-                            <button class="add-to-cart-btn disabled" disabled>
-                                <i class="fas fa-times"></i>
-                                Stokta Yok
-                            </button>
-                        {% endif %}
+                                {% if product.stock > 0 %}
+                                <button onclick="event.preventDefault(); addToCart('{{ product.id }}')" 
+                                        class="add-to-cart-btn">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    Sepete Ekle
+                                </button>
+                                {% else %}
+                                <button class="add-to-cart-btn disabled" disabled>
+                                    <i class="fas fa-times"></i>
+                                    Stokta Yok
+                                </button>
+                                {% endif %}
+                            </div>
+                        </a>
                     </div>
-                </a>
+                    {% endfor %}
+                </div>
             </div>
-            {% endfor %}
+
+            <button class="slider-nav next" onclick="moveSlider('featured', 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <div class="slider-dots" id="featured-dots">
+                <!-- Dots will be added by JavaScript -->
+            </div>
         </div>
     </div>
 </section>
 
 <!-- Yeni Ürünler -->
-<section class="new-products">
+<section class="product-slider-section">
     <div class="container">
         <div class="section-header">
             <h2>Yeni Ürünler</h2>
             <a href="{{ url_for('admin.products') }}" class="view-all">Tümünü Gör</a>
         </div>
-        <div class="product-grid">
-            {% for product in new_products %}
-            <div class="product-card">
-                <a href="{{ url_for('product_detail', slug=product.slug) }}" class="product-link">
-                    <div class="product-image">
-                        {% if product.images and product.images[0] %}
-                            <img src="{{ url_for('static', filename='images/products/' + product.images[0].image_path) }}"
-                                 alt="{{ product.name }}"
-                                 loading="lazy">
-                        {% else %}
-                            <div class="no-image">
-                                <i class="fas fa-image"></i>
+        
+        <div class="product-slider">
+            <button class="slider-nav prev" onclick="moveSlider('new', -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <div class="slider-container" id="new-slider">
+                <div class="slider-track">
+                    {% for product in new_products %}
+                    <div class="product-card">
+                        <a href="{{ url_for('product_detail', slug=product.slug) }}" class="product-link">
+                            <div class="product-image">
+                                {% if product.images and product.images[0] %}
+                                    <img src="{{ url_for('static', filename='images/products/' + product.images[0].image_path) }}"
+                                         alt="{{ product.name }}"
+                                         loading="lazy">
+                                {% else %}
+                                    <div class="no-image">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                {% endif %}
+                                
+                                {% if product.stock == 0 %}
+                                <div class="stock-badge out">Stokta Yok</div>
+                                {% elif product.stock <= 5 %}
+                                <div class="stock-badge limited">Sınırlı Stok</div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                        
-                        {% if product.stock == 0 %}
-                            <div class="stock-badge out">Stokta Yok</div>
-                        {% elif product.stock <= 5 %}
-                            <div class="stock-badge limited">Sınırlı Stok</div>
-                        {% endif %}
-                    </div>
 
-                    <div class="product-info">
-                        {% if product.brand %}
-                            <div class="brand">{{ product.brand.name }}</div>
-                        {% endif %}
-                        
-                        <div class="product-title">{{ product.name }}</div>
-                        
-                        <div class="price-container">
-                            {% if product.old_price and product.old_price > product.price %}
-                                <div class="old-price">{{ "%.2f"|format(product.old_price) }} TL</div>
-                                <div class="discount">-%{{ ((product.old_price - product.price) / product.old_price * 100)|round|int }}</div>
-                            {% endif %}
-                            <div class="current-price">{{ "%.2f"|format(product.price) }} TL</div>
-                        </div>
+                            <div class="product-info">
+                                {% if product.brand %}
+                                <div class="brand">{{ product.brand.name }}</div>
+                                {% endif %}
+                                
+                                <div class="product-title">{{ product.name }}</div>
+                                
+                                <div class="price-container">
+                                    {% if product.old_price and product.old_price > product.price %}
+                                    <div class="old-price">{{ "%.2f"|format(product.old_price) }} TL</div>
+                                    <div class="discount">-%{{ ((product.old_price - product.price) / product.old_price * 100)|round|int }}</div>
+                                    {% endif %}
+                                    <div class="current-price">{{ "%.2f"|format(product.price) }} TL</div>
+                                </div>
 
-                        {% if product.stock > 0 %}
-                            <button class="add-to-cart-btn" data-product-id="{{ product.id }}">
-                                <i class="fas fa-shopping-cart"></i>
-                                Sepete Ekle
-                            </button>
-                        {% else %}
-                            <button class="add-to-cart-btn disabled" disabled>
-                                <i class="fas fa-times"></i>
-                                Stokta Yok
-                            </button>
-                        {% endif %}
+                                {% if product.stock > 0 %}
+                                <button onclick="event.preventDefault(); addToCart('{{ product.id }}')" 
+                                        class="add-to-cart-btn">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    Sepete Ekle
+                                </button>
+                                {% else %}
+                                <button class="add-to-cart-btn disabled" disabled>
+                                    <i class="fas fa-times"></i>
+                                    Stokta Yok
+                                </button>
+                                {% endif %}
+                            </div>
+                        </a>
                     </div>
-                </a>
+                    {% endfor %}
+                </div>
             </div>
-            {% endfor %}
+
+            <button class="slider-nav next" onclick="moveSlider('new', 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <div class="slider-dots" id="new-dots">
+                <!-- Dots will be added by JavaScript -->
+            </div>
         </div>
     </div>
 </section>
@@ -160,6 +200,116 @@
 
 {% block extra_js %}
 <script>
+// Slider state ve değişkenleri
+const sliderState = {
+    featured: { currentSlide: 0 },
+    new: { currentSlide: 0 }
+};
+
+let isTransitioning = false;
+
+// Slider'ları başlat
+function initSliders() {
+    initSlider('featured');
+    initSlider('new');
+    setupAutoSlide();
+}
+
+function initSlider(type) {
+    const container = document.getElementById(`${type}-slider`);
+    const track = container.querySelector('.slider-track');
+    const cards = track.querySelectorAll('.product-card');
+    const dotsContainer = document.getElementById(`${type}-dots`);
+    
+    // Kaç ürün gösterileceğini hesapla
+    const itemsPerSlide = getItemsPerSlide();
+    const totalSlides = Math.ceil(cards.length / itemsPerSlide);
+    
+    // Dot'ları oluştur
+    dotsContainer.innerHTML = '';
+    for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.className = `dot ${i === 0 ? 'active' : ''}`;
+        dot.onclick = () => goToSlide(type, i);
+        dotsContainer.appendChild(dot);
+    }
+    
+    // İlk slide'ı göster
+    updateSlider(type);
+}
+
+function getItemsPerSlide() {
+    if (window.innerWidth >= 1200) return 4;
+    if (window.innerWidth >= 768) return 3;
+    return 2;
+}
+
+function moveSlider(type, direction) {
+    if (isTransitioning) return;
+    
+    const container = document.getElementById(`${type}-slider`);
+    const track = container.querySelector('.slider-track');
+    const cards = track.querySelectorAll('.product-card');
+    const itemsPerSlide = getItemsPerSlide();
+    const totalSlides = Math.ceil(cards.length / itemsPerSlide);
+    
+    isTransitioning = true;
+    sliderState[type].currentSlide = (sliderState[type].currentSlide + direction + totalSlides) % totalSlides;
+    
+    updateSlider(type);
+    
+    setTimeout(() => {
+        isTransitioning = false;
+    }, 500);
+}
+
+function goToSlide(type, slideIndex) {
+    if (isTransitioning) return;
+    
+    isTransitioning = true;
+    sliderState[type].currentSlide = slideIndex;
+    
+    updateSlider(type);
+    
+    setTimeout(() => {
+        isTransitioning = false;
+    }, 500);
+}
+
+function updateSlider(type) {
+    const container = document.getElementById(`${type}-slider`);
+    const track = container.querySelector('.slider-track');
+    const dots = document.querySelectorAll(`#${type}-dots .dot`);
+    const itemsPerSlide = getItemsPerSlide();
+    
+    // Track'i kaydır
+    const translateX = -(sliderState[type].currentSlide * (100 / itemsPerSlide));
+    track.style.transform = `translateX(${translateX}%)`;
+    
+    // Aktif dot'u güncelle
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === sliderState[type].currentSlide);
+    });
+}
+
+function setupAutoSlide() {
+    setInterval(() => {
+        if (!isTransitioning) {
+            moveSlider('featured', 1);
+            moveSlider('new', 1);
+        }
+    }, 5000);
+}
+
+// Sayfa yüklendiğinde slider'ları başlat
+document.addEventListener('DOMContentLoaded', initSliders);
+
+// Pencere boyutu değiştiğinde slider'ları güncelle
+window.addEventListener('resize', () => {
+    initSlider('featured');
+    initSlider('new');
+});
+
 function addToCart(productId) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     
@@ -274,6 +424,49 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('.slider-container').addEventListener('mouseover', stopAutoSlide);
     document.querySelector('.slider-container').addEventListener('mouseout', startAutoSlide);
 });
+document.addEventListener('DOMContentLoaded', function() {
+    const slides = document.querySelectorAll('.hero-slider .slide');
+    const dots = document.querySelectorAll('.hero-slider .dot');
+    const prevBtn = document.querySelector('.hero-slider .prev');
+    const nextBtn = document.querySelector('.hero-slider .next');
+    let currentSlide = 0;
+    let isTransitioning = false;
+
+    function showSlide(index) {
+        if (isTransitioning) return;
+        
+        isTransitioning = true;
+        slides.forEach(slide => slide.classList.remove('active'));
+        dots.forEach(dot => dot.classList.remove('active'));
+        
+        slides[index].classList.add('active');
+        dots[index].classList.add('active');
+        currentSlide = index;
+        
+        setTimeout(() => {
+            isTransitioning = false;
+        }, 500);
+    }
+
+    function nextSlide() {
+        showSlide((currentSlide + 1) % slides.length);
+    }
+
+    function prevSlide() {
+        showSlide((currentSlide - 1 + slides.length) % slides.length);
+    }
+
+    // Event Listeners
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => showSlide(index));
+    });
+
+    // Otomatik geçiş
+    setInterval(nextSlide, 5000);
+});
 </script>
 {% endblock %}
 
@@ -282,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
 a {
         text-decoration: none; /* Alt çizgiyi kaldırır */
 }
-/* Hero Section Styles */
+/* Hero Slider Styles */
 .hero-slider {
     position: relative;
     width: 90%;
@@ -292,22 +485,22 @@ a {
     margin: 20px auto;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    background: #f0f0f0; /* Arka plan rengi eklendi */
+    background: #f0f0f0;
 }
 
-.slider-container {
+.hero-slider .slider-container {
     position: relative;
     width: 100%;
     height: 100%;
 }
 
-.slides {
+.hero-slider .slides {
     position: relative;
     width: 100%;
     height: 100%;
 }
 
-.slide {
+.hero-slider .slide {
     position: absolute;
     top: 0;
     left: 0;
@@ -315,83 +508,83 @@ a {
     height: 100%;
     opacity: 0;
     transition: opacity 0.5s ease;
-    display: flex; /* Flex yapısı eklendi */
-    justify-content: center; /* Yatayda ortalama */
-    align-items: center; /* Dikeyde ortalama */
-    background: #f0f0f0; /* Slide arka planı */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f0f0f0;
 }
 
-.slide.active {
+.hero-slider .slide.active {
     opacity: 1;
     z-index: 1;
 }
 
-.slide img {
+.hero-slider .slide img {
     max-width: 100%;
     max-height: 100%;
-    object-fit: contain; /* cover yerine contain kullanıldı */
-    width: auto; /* Otomatik genişlik */
-    height: auto; /* Otomatik yükseklik */
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
 }
 
-/* Slider Noktaları */
-.slider-dots {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-    display: flex;
-    gap: 10px;
-}
-
-.dot {
-    width: 12px;
-    height: 12px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.dot.active {
-    background: #000;
-}
-
-/* Slider Okları */
-.slider-arrow {
+.hero-slider .slider-nav {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     width: 40px;
     height: 40px;
     background: rgba(0, 0, 0, 0.5);
-    color: #fff;
+    color: white;
     border: none;
     border-radius: 50%;
     cursor: pointer;
     z-index: 2;
-    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
 }
 
-.slider-arrow:hover {
+.hero-slider .slider-nav:hover {
     background: rgba(0, 0, 0, 0.8);
     transform: translateY(-50%) scale(1.1);
 }
 
-.slider-arrow.prev {
+.hero-slider .slider-nav.prev {
     left: 20px;
 }
 
-.slider-arrow.next {
+.hero-slider .slider-nav.next {
     right: 20px;
 }
 
-/* Responsive Tasarım */
+.hero-slider .slider-dots {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 2;
+}
+
+.hero-slider .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.hero-slider .dot.active {
+    background: white;
+    transform: scale(1.2);
+}
+
+/* Responsive */
 @media (max-width: 1200px) {
     .hero-slider {
         width: 95%;
@@ -407,7 +600,7 @@ a {
         border-radius: 0;
     }
 
-    .slider-arrow {
+    .hero-slider .slider-nav {
         width: 35px;
         height: 35px;
         font-size: 16px;
@@ -628,6 +821,364 @@ a {
         padding: 8px;
         font-size: 0.8rem;
     }
+}
+/* Product Slider Styles */
+.product-slider-section {
+    margin: 40px 0;
+    position: relative;
+}
+
+.product-slider {
+    position: relative;
+    padding: 0 60px; /* Kenarlardan uzaklığı artırdık */
+    margin-bottom: 40px; /* Alt kısımda nokta göstergeler için boşluk */
+}
+
+.slider-container {
+    overflow: hidden;
+    margin: 0 -10px;
+}
+
+.slider-track {
+    display: flex;
+    transition: transform 0.5s ease;
+    margin: 0 10px;
+}
+
+.product-card {
+    flex: 0 0 calc(25% - 20px);
+    margin: 0 10px;
+}
+
+.slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    margin: 0 -10px; /* Butonları dışarı doğru kaydırdık */
+    background: #1a237e;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.slider-nav:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.slider-nav.prev {
+    left: 10px; /* Butonu daha da dışarı aldık */
+}
+
+.slider-nav.next {
+    right: 10px; /* Butonu daha da dışarı aldık */
+}
+
+.slider-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: translateY(-50%) scale(1);
+}
+
+.slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%); /* Merkeze almak için */
+    z-index: 1;
+    width: auto; /* Genişliği içeriğe göre ayarla */
+    white-space: nowrap; /* Noktaların yan yana durmasını sağla */
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ddd;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    background: #1a237e;
+    transform: scale(1.2);
+}
+
+@media (max-width: 1200px) {
+    .product-card {
+        flex: 0 0 calc(33.333% - 20px);
+    }
+}
+
+@media (max-width: 768px) {
+    .product-card {
+        flex: 0 0 calc(50% - 20px);
+    }
+    
+    .slider-nav {
+        width: 35px;
+        height: 35px;
+        margin: 0 -5px; /* Mobilde butonları biraz daha içeri al */
+    }
+    
+    .product-slider {
+        padding: 0 45px; /* Mobilde kenar boşluklarını azalt */
+    }
+
+    .slider-nav.prev {
+        left: 5px;
+    }
+
+    .slider-nav.next {
+        right: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-card {
+        flex: 0 0 calc(100% - 20px);
+    }
+    
+    .slider-nav {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .product-slider {
+        padding: 0 30px;
+    }
+}
+/* Product Slider temel stilleri */
+.product-slider-section {
+    margin: 40px 0;
+    position: relative;
+}
+
+.product-slider {
+    position: relative;
+    padding: 0 60px;
+    margin-bottom: 40px;
+}
+
+.slider-container {
+    overflow: hidden;
+    margin: 0 -10px;
+}
+
+.slider-track {
+    display: flex;
+    transition: transform 0.5s ease;
+    margin: 0 10px;
+}
+
+.product-card {
+    flex: 0 0 calc(25% - 20px);
+    margin: 0 10px;
+}
+
+/* Product Slider Responsive */
+@media (max-width: 1200px) {
+    .product-card {
+        flex: 0 0 calc(33.333% - 20px);
+    }
+}
+
+@media (max-width: 768px) {
+    .product-card {
+        flex: 0 0 calc(50% - 20px);
+    }
+    
+    .slider-nav {
+        width: 35px;
+        height: 35px;
+        margin: 0 -5px;
+    }
+    
+    .product-slider {
+        padding: 0 45px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-card {
+        flex: 0 0 calc(50% - 10px); /* 2 ürün yan yana */
+        margin: 0 5px; /* Kenar boşluklarını azalttık */
+    }
+    
+    .slider-nav {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .product-slider {
+        padding: 0 25px;
+    }
+
+    /* Ürün kartı içindeki elementleri küçült */
+    .product-title {
+        font-size: 0.85rem;
+        -webkit-line-clamp: 2;
+        height: 2.4em;
+    }
+
+    .brand {
+        font-size: 0.75rem;
+    }
+
+    .current-price {
+        font-size: 1rem;
+    }
+
+    .old-price {
+        font-size: 0.75rem;
+    }
+
+    .discount {
+        font-size: 0.7rem;
+        padding: 2px 4px;
+    }
+
+    .add-to-cart-btn {
+        padding: 6px 8px;
+        font-size: 0.75rem;
+    }
+
+    .add-to-cart-btn i {
+        font-size: 0.85rem;
+    }
+}
+/* Hero Slider temel stilleri */
+.hero-slider {
+    position: relative;
+    width: 90%;
+    max-width: 1400px;
+    height: 600px;
+    overflow: hidden;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background: #f0f0f0;
+}
+
+.hero-slider .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* cover yerine contain kullanıyoruz */
+    background: #f0f0f0; /* Görsel küçük kalırsa arka plan rengi */
+}
+
+/* Hero Slider Responsive */
+@media (max-width: 768px) {
+    .hero-slider {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16/9; /* Mobilde 16:9 oranını koruyalım */
+        margin: 0;
+        border-radius: 0;
+    }
+
+    .hero-slider .slider-nav {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    .hero-slider .slider-dots {
+        bottom: 10px;
+    }
+
+    .hero-slider .dot {
+        width: 8px;
+        height: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-slider {
+        aspect-ratio: 4/3; /* Daha küçük ekranlarda 4:3 oranı */
+    }
+}
+.hero-slider {
+    position: relative;
+    width: 90%;
+    max-width: 1400px;
+    height: 600px;
+    overflow: hidden;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background: #f0f0f0;
+}
+
+@media (max-width: 768px) {
+    .hero-slider {
+        width: 100vw; /* viewport width kullan */
+        height: auto;
+        aspect-ratio: 16/9;
+        margin: 0;
+        border-radius: 0;
+        /* Sağ boşluğu engellemek için */
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 100vw;
+    }
+
+    /* Diğer stiller aynı kalacak */
+    .hero-slider .slider-nav {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    .hero-slider .slider-dots {
+        bottom: 10px;
+    }
+
+    .hero-slider .dot {
+        width: 8px;
+        height: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-slider {
+        aspect-ratio: 4/3;
+    }
+}
+
+/* Sağ boşluğu engellemek için container'ı da düzenleyelim */
+.slider-container {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.hero-slider .slide {
+    width: 100vw;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.hero-slider .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #f0f0f0;
 }
 </style>
 {% endblock %}

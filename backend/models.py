@@ -112,6 +112,47 @@ class Brand(db.Model):
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    stock_code = db.Column(db.String(10), unique=True, nullable=False, name='uq_product_stock_code')
+    name = db.Column(db.String(100), nullable=False)
+    slug = db.Column(db.String(200), unique=True, name='uq_product_slug')
+    price = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text)
+
+    def _get_description_html(self):
+        if self.description:
+            return self.description.replace('\n', '<br>')
+        return ''
+        
+    description_html = property(_get_description_html)
+    brand_id = db.Column(db.Integer, db.ForeignKey('brand.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    stock = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # İlişkiler
+    brand = db.relationship('Brand', back_populates='products')
+    images = db.relationship('ProductImage', backref='product', lazy=True, cascade='all, delete-orphan')
+
+    def __init__(self, *args, **kwargs):
+        if 'stock_code' not in kwargs:
+            kwargs['stock_code'] = self.generate_stock_code()
+        if 'slug' not in kwargs:
+            kwargs['slug'] = slugify(kwargs.get('name', ''))
+        super(Product, self).__init__(*args, **kwargs)
+
+    def generate_stock_code(self):
+        while True:
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            if not Product.query.filter_by(stock_code=code).first():
+                return code
+
+    @validates('stock_code')
+    def validate_stock_code(self, key, stock_code):
+        if not stock_code:
+            return self.generate_stock_code()
+        return stock_code
+    id = db.Column(db.Integer, primary_key=True)
     stock_code = db.Column(db.String(10), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     slug = db.Column(db.String(200), unique=True)

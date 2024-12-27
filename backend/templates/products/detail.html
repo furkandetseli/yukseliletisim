@@ -3,17 +3,30 @@
 {% block content %}
 <div class="container">
     <!-- detail.html -->
-    <nav class="breadcrumb">
-        <a href="{{ url_for('index') }}">Anasayfa</a>
-        {% if product.category_ref %}
-        <span>/</span>
-        <a href="{{ url_for('category_products', category_name=product.category_ref.name) }}">
-            {{ product.category_ref.name }}
-        </a>
-        {% endif %}
-        <span>/</span>
-        <span>{{ product.name }}</span>
-    </nav>
+    <div class="breadcrumb-container">
+        <div class="container">
+            <nav class="breadcrumb">
+                <a href="{{ url_for('index') }}" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    Ana Sayfa
+                </a>
+                <span class="breadcrumb-separator">
+                    <i class="fas fa-chevron-right"></i>
+                </span>
+    
+                {% if product.category %}
+                    <a href="{{ url_for('category_products', category_name=product.category) }}" class="breadcrumb-link">
+                        {{ product.category }}
+                    </a>
+                    <span class="breadcrumb-separator">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                {% endif %}
+    
+                <span class="breadcrumb-current">{{ product.name }}</span>
+            </nav>
+        </div>
+    </div>
 
     <div class="product-detail">
         <div class="product-gallery">

@@ -63,6 +63,9 @@ def create_app():
     @app.route('/product/<slug>')
     def product_detail(slug):
         product = Product.query.filter_by(slug=slug).first_or_404()
+        # Ürünün kategorisini al
+        category = db.session.get(Category, product.category_id)
+        product.category = category if category else None
         related_products = []
         if product.category_id:
             related_products = Product.query.filter(

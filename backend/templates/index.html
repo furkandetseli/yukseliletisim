@@ -38,8 +38,9 @@
 <!-- Öne Çıkan Ürünler -->
 <section class="product-slider-section">
     <div class="container">
+        
         <div class="section-header">
-            <h2>Öne Çıkan Ürünler</h2>
+            <h2 class="section-title">Öne Çıkan Ürünler</h2>
             <a href="{{ url_for('admin.products') }}" class="view-all">Tümünü Gör</a>
         </div>
         
@@ -116,11 +117,77 @@
     </div>
 </section>
 
+<!-- Ürün Kategorileri Bölümü -->
+<section class="categories-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">ÜRÜN KATEGORİLERİ</h2>
+            <p class="section-subtitle">En kaliteli teknoloji ürünleri uygun fiyatlarla</p>
+        </div>
+
+        <div class="categories-grid">
+            <!-- Güç Bankaları -->
+            <a href="/category/POWERBANK" class="category-card">
+                <div class="category-image">
+                    <img src="/static/images/categories/powerbank.jpg" alt="Güç Bankaları">
+                </div>
+                <div class="category-content">
+                    <div class="category-icon">
+                        <i class="fas fa-battery-full"></i>
+                    </div>
+                    <h3>GÜÇ BANKALARI</h3>
+                    <p>10.000mAh'den 50.000mAh'e kadar geniş kapasite seçenekleri</p>
+                    <span class="explore-link">
+                        Keşfet
+                        <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+
+            <!-- Kulaklıklar -->
+            <a href="/category/KULAKLIKLAR" class="category-card">
+                <div class="category-image">
+                    <img src="/static/images/categories/kulaklık.jpg" alt="Kulaklıklar">
+                </div>
+                <div class="category-content">
+                    <div class="category-icon">
+                        <i class="fas fa-headphones"></i>
+                    </div>
+                    <h3>KULAKLIKLAR</h3>
+                    <p>Premium ses kalitesi ve üstün gürültü önleme teknolojisi</p>
+                    <span class="explore-link">
+                        Keşfet
+                        <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+
+            <!-- Adaptörler -->
+            <a href="/category/ŞARJ%20CİHAZLARI" class="category-card">
+                <div class="category-image">
+                    <img src="/static/images/categories/sarj.jpg" alt="Adaptörler">
+                </div>
+                <div class="category-content">
+                    <div class="category-icon">
+                        <i class="fas fa-plug"></i>
+                    </div>
+                    <h3>ADAPTÖRLER</h3>
+                    <p>65W'a kadar hızlı şarj destekli GaN teknolojili adaptörler</p>
+                    <span class="explore-link">
+                        Keşfet
+                        <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
 <!-- Yeni Ürünler -->
 <section class="product-slider-section">
     <div class="container">
         <div class="section-header">
-            <h2>Yeni Ürünler</h2>
+            <h2 class="section-title">Yeni Ürünler</h2>
             <a href="{{ url_for('admin.products') }}" class="view-all">Tümünü Gör</a>
         </div>
         
@@ -196,6 +263,7 @@
         </div>
     </div>
 </section>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -466,6 +534,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Otomatik geçiş
     setInterval(nextSlide, 5000);
+});
+document.addEventListener('DOMContentLoaded', function() {
+    // Kategorilere hover efekti için
+    const categories = document.querySelectorAll('.category-card');
+    
+    categories.forEach(category => {
+        category.addEventListener('mouseenter', function() {
+            this.querySelector('.category-icon').style.animation = 'none';
+        });
+        
+        category.addEventListener('mouseleave', function() {
+            this.querySelector('.category-icon').style.animation = 'float 3s ease-in-out infinite';
+        });
+    });
 });
 </script>
 {% endblock %}
@@ -1179,6 +1261,298 @@ a {
     height: 100%;
     object-fit: contain;
     background: #f0f0f0;
+}
+.categories-section {
+    padding: 80px 0;
+    background: #f8f9fa;
+    position: relative;
+    overflow: hidden;
+}
+
+.categories-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(26, 35, 126, 0.2), transparent);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 60px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    color: #1a237e;
+    font-weight: 800;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: #1a237e;
+    border-radius: 2px;
+}
+
+.section-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin-top: 25px;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    padding: 20px;
+}
+
+.category-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+}
+
+.category-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.category-image {
+    position: relative;
+    padding-top: 60%;
+    overflow: hidden;
+    background: linear-gradient(45deg, #f6f7f9, #ffffff);
+}
+
+.category-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.category-card:hover .category-image img {
+    transform: scale(1.1);
+}
+
+.category-content {
+    padding: 30px;
+    position: relative;
+    background: white;
+}
+
+.category-icon {
+    position: absolute;
+    top: -30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: #1a237e;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    box-shadow: 0 5px 15px rgba(26, 35, 126, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover .category-icon {
+    transform: rotateY(180deg);
+}
+
+.category-content h3 {
+    color: #1a237e;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.category-content p {
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.explore-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #1a237e;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.explore-link i {
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover .explore-link i {
+    transform: translateX(5px);
+}
+
+/* Responsive Tasarım */
+@media (max-width: 1200px) {
+    .section-title {
+        font-size: 2.2rem;
+    }
+    
+    .categories-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .categories-section {
+        padding: 60px 0;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+    }
+    
+    .section-subtitle {
+        font-size: 1rem;
+    }
+    
+    .categories-grid {
+        grid-template-columns: 1fr;
+        padding: 15px;
+    }
+    
+    .category-content {
+        padding: 25px;
+    }
+    
+    .category-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+        top: -25px;
+    }
+}
+
+/* Animasyonlar */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+.category-icon {
+    animation: float 3s ease-in-out infinite;
+}
+/* Tüm bölüm başlıkları için genel stil */
+.section-header {
+    text-align: center;
+    margin-bottom: 60px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    color: #1a237e;
+    font-weight: 800;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: #1a237e;
+    border-radius: 2px;
+}
+
+.section-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    margin-top: 25px;
+    opacity: 0.9;
+}
+
+/* "Şimdi Satışta" başlığı için özel stil */
+#now-selling .section-title::after {
+    background: linear-gradient(to right, #1a237e, #3949ab);
+}
+
+/* Öne Çıkan Ürünler başlığı için özel stil */
+.featured-products .section-title::after {
+    background: linear-gradient(to right, #1a237e, #283593);
+}
+
+/* Yeni Ürünler başlığı için özel stil */
+.new-products .section-title::after {
+    background: linear-gradient(to right, #1a237e, #1e88e5);
+}
+
+/* Responsive tasarım */
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .section-subtitle {
+        font-size: 1rem;
+    }
+
+    .section-title::after {
+        width: 60px;
+        height: 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title {
+        font-size: 1.8rem;
+    }
+
+    .section-header {
+        margin-bottom: 40px;
+    }
 }
 </style>
 {% endblock %}

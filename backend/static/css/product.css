@@ -739,3 +739,75 @@
     color: #999;
     margin-bottom: 20px;
 }
+.breadcrumb-container {
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    padding: 12px 0;
+    margin-bottom: 30px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+.breadcrumb-link {
+    color: #1a237e;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-link:hover {
+    color: #3949ab;
+    text-decoration: underline;
+}
+
+.breadcrumb-link i {
+    font-size: 0.9rem;
+}
+
+.breadcrumb-separator {
+    color: #999;
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.breadcrumb-current {
+    color: #666;
+    font-weight: 500;
+}
+
+/* Responsive tasarım */
+@media (max-width: 768px) {
+    .breadcrumb-container {
+        padding: 10px 0;
+        margin-bottom: 20px;
+    }
+    
+    .breadcrumb {
+        font-size: 0.9rem;
+    }
+}
+
+/* Animasyon efekti */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.breadcrumb > * {
+    animation: fadeIn 0.3s ease forwards;
+}

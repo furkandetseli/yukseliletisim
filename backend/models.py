@@ -129,7 +129,8 @@ class Product(db.Model):
     stock = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+    # Kategori ilişkisi
+    category = db.relationship('Category', backref='products')
     # İlişkiler
     brand = db.relationship('Brand', back_populates='products')
     images = db.relationship('ProductImage', backref='product', lazy=True, cascade='all, delete-orphan')

@@ -118,35 +118,37 @@
 
     <!-- Sayfalama -->
     {% if products.pages > 1 %}
-    <div class="pagination">
-        {% if products.has_prev %}
-        <a href="{{ url_for('category_products', category_name=category.name, page=products.prev_num, sort=current_sort) }}" 
-           class="page-btn prev">
-            <i class="fas fa-chevron-left"></i>
-            Önceki
-        </a>
-        {% endif %}
-        
-        <div class="page-numbers">
-            {% for page in range(1, products.pages + 1) %}
-                {% if page == products.page %}
-                <span class="page-btn current">{{ page }}</span>
-                {% elif page == 1 or page == products.pages or (page >= products.page - 2 and page <= products.page + 2) %}
-                <a href="{{ url_for('category_products', category_name=category.name, page=page, sort=current_sort) }}" 
-                   class="page-btn">{{ page }}</a>
-                {% elif page == products.page - 3 or page == products.page + 3 %}
-                <span class="page-dots">...</span>
-                {% endif %}
-            {% endfor %}
-        </div>
+    <div class="pagination-container">
+        <div class="pagination">
+            {% if products.has_prev %}
+            <a href="{{ url_for('category_products', category_name=category.name, page=products.prev_num, sort=current_sort) }}" 
+            class="pagination-link prev">
+                <i class="fas fa-chevron-left"></i>
+                Önceki
+            </a>
+            {% endif %}
+            
+            <div class="page-numbers">
+                {% for page in range(1, products.pages + 1) %}
+                    {% if page == products.page %}
+                    <span class="page-num current">{{ page }}</span>
+                    {% elif page == 1 or page == products.pages or (page >= products.page - 2 and page <= products.page + 2) %}
+                    <a href="{{ url_for('category_products', category_name=category.name, page=page, sort=current_sort) }}" 
+                    class="page-num">{{ page }}</a>
+                    {% elif page == products.page - 3 or page == products.page + 3 %}
+                    <span class="page-dots">...</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
 
-        {% if products.has_next %}
-        <a href="{{ url_for('category_products', category_name=category.name, page=products.next_num, sort=current_sort) }}" 
-           class="page-btn next">
-            Sonraki
-            <i class="fas fa-chevron-right"></i>
-        </a>
-        {% endif %}
+            {% if products.has_next %}
+            <a href="{{ url_for('category_products', category_name=category.name, page=products.next_num, sort=current_sort) }}" 
+            class="pagination-link next">
+                Sonraki
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
     </div>
     {% endif %}
 </div>

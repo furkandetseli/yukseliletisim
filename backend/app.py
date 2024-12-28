@@ -75,6 +75,7 @@ def create_app():
         
         return render_template('products/detail.html', 
                             product=product, 
+                            category=category,  # Kategoriyi template'e gönder 
                             related_products=related_products)
 
     @app.route('/login', methods=['GET', 'POST'])
@@ -313,34 +314,37 @@ def create_app():
         page = request.args.get('page', 1, type=int)
         sort = request.args.get('sort', 'default')
         
-        # Hem ana kategori hem alt kategori kontrolü
+        # Kategoriyi bul
         category = Category.query.filter_by(name=category_name).first_or_404()
         
-        # Bu kategoriye ait ve alt kategorilere ait tüm ürünleri al
+        # Tüm alt kategorileri recursive olarak toplayan yardımcı fonksiyon
+        def get_all_subcategory_ids(category):
+            ids = [category.id]
+            for child in category.children:
+                ids.extend(get_all_subcategory_ids(child))
+            return ids
+        
+        # Bu kategoriye ve tüm alt kategorilerine ait ürünleri al
         query = Product.query
         
-        if category.children.count() > 0:
-            # Ana kategori ise, kendi ve alt kategorilerindeki ürünleri al
-            subcategory_ids = [c.id for c in category.children]
-            query = query.filter(
-                db.or_(
-                    Product.category_id == category.id,
-                    Product.category_id.in_(subcategory_ids)
-                )
-            )
-        else:
-            # Alt kategori ise sadece kendi ürünlerini al
-            query = query.filter_by(category_id=category.id)
+        # Tüm alt kategori ID'lerini topla
+        all_category_ids = get_all_subcategory_ids(category)
         
-        # Sıralama
+        # Ürünleri filtrele
+        query = query.filter(Product.category_id.in_(all_category_ids))
+            
+        # Alt kategorilere göre grupla ve sırala
+        query = query.join(Category).order_by(Category.id.asc())
+        
+        # Kullanıcının seçtiği sıralamayı uygula
         if sort == 'price_asc':
-            query = query.order_by(Product.price.asc())
+            query = query.order_by(Category.id.asc(), Product.price.asc())
         elif sort == 'price_desc':
-            query = query.order_by(Product.price.desc())
+            query = query.order_by(Category.id.asc(), Product.price.desc())
         elif sort == 'newest':
-            query = query.order_by(Product.created_at.desc())
+            query = query.order_by(Category.id.asc(), Product.created_at.desc())
         else:
-            query = query.order_by(Product.name.asc())
+            query = query.order_by(Category.id.asc(), Product.id.asc())
         
         # Sayfalama
         products = query.paginate(page=page, per_page=12)
@@ -349,7 +353,6 @@ def create_app():
                             products=products,
                             category=category,
                             current_sort=sort)
-
     @app.route('/search')
     def search():
         query = request.args.get('q', '')

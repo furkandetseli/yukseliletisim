@@ -14,9 +14,9 @@
                     <i class="fas fa-chevron-right"></i>
                 </span>
     
-                {% if product.category %}
-                    <a href="{{ url_for('category_products', category_name=product.category) }}" class="breadcrumb-link">
-                        {{ product.category }}
+                {% if category %}
+                    <a href="{{ url_for('category_products', category_name=category.name) }}" class="breadcrumb-link">
+                        {{ category.name }}
                     </a>
                     <span class="breadcrumb-separator">
                         <i class="fas fa-chevron-right"></i>

@@ -195,7 +195,7 @@ def create_app():
             quantity = data.get('quantity', 1)
             
             # Ürünü veritabanından al
-            product = Product.query.get_or_404(product_id)
+            product = Product.session.get_or_404(product_id)
             
             # Stok kontrolü
             if not product:

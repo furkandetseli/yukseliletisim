@@ -259,6 +259,7 @@
 {% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/imageUploader.css') }}">
 <style>
 /* Form Layout */
 .form-grid {
@@ -606,6 +607,8 @@
 </style>
 {% endblock %}
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="{{ url_for('static', filename='js/imageUploader.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Tab Switching
@@ -626,107 +629,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Image Upload Handling
-    const dropzone = document.getElementById('imageDropzone');
-    const currentImages = document.getElementById('currentImages');
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropzone.addEventListener(eventName, preventDefaults, false);
+    // Initialize Image Uploader
+    const imageUploader = new ImageUploadHandler({
+        dropzoneId: 'imageDropzone',
+        previewContainerId: 'imagePreview',
+        maxFiles: 5,
+        maxFileSize: 2 * 1024 * 1024, // 2MB
+        allowedTypes: ['image/jpeg', 'image/png', 'image/gif']
     });
-
-    function preventDefaults (e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropzone.addEventListener(eventName, () => {
-            dropzone.classList.add('dragover');
-        });
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropzone.addEventListener(eventName, () => {
-            dropzone.classList.remove('dragover');
-        });
-    });
-
-    dropzone.addEventListener('drop', handleDrop);
-    dropzone.addEventListener('click', () => document.getElementById('fileInput').click());
-
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        handleFiles(files);
-    }
-
-    function handleFiles(files) {
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-        const maxSize = 2 * 1024 * 1024; // 2MB
-        const maxFiles = 5;
-
-        // Validate files
-        const validFiles = Array.from(files).filter(file => {
-            if (!allowedTypes.includes(file.type)) {
-                showError(`${file.name} desteklenmeyen dosya türü`);
-                return false;
-            }
-            if (file.size > maxSize) {
-                showError(`${file.name} çok büyük (max 2MB)`);
-                return false;
-            }
-            return true;
-        });
-
-        if (validFiles.length > maxFiles) {
-            showError('En fazla 5 görsel yükleyebilirsiniz');
-            return;
-        }
-
-        // Upload files
-        validFiles.forEach(uploadFile);
-    }
-
-    function uploadFile(file) {
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
-
-        fetch('/admin/products/upload-image', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                addImagePreview(data.image);
-            } else {
-                showError(data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showError('Görsel yüklenirken bir hata oluştu');
-        });
-    }
-
-    function addImagePreview(image) {
-        const div = document.createElement('div');
-        div.className = 'image-item';
-        div.dataset.id = image.id;
-        div.innerHTML = `
-            <img src="/static/images/products/${image.path}" alt="">
-            <div class="image-actions">
-                <button type="button" class="btn btn-sm btn-light make-primary">
-                    Ana Görsel Yap
-                </button>
-                <button type="button" class="btn btn-sm btn-danger delete-image">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-        currentImages.appendChild(div);
-    }
 
     // Price and Discount Calculation
     const priceInput = document.getElementById('price');

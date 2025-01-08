@@ -283,13 +283,19 @@ def upload_product_image():
         
     if file and allowed_file(file.filename):
         try:
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            # Benzersiz dosya adı oluştur
+            ext = file.filename.rsplit('.', 1)[1].lower()
+            unique_filename = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{random.randint(1000, 9999)}.{ext}"
+            filename = secure_filename(unique_filename)
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'products', filename)
+            
+            # Dizin yoksa oluştur
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
             file.save(file_path)
             
             image = ProductImage(
                 image_path=filename,
-                is_primary=False  # İlk görsel değilse
+                is_primary=False
             )
             db.session.add(image)
             db.session.commit()
@@ -298,11 +304,14 @@ def upload_product_image():
                 'success': True,
                 'image': {
                     'id': image.id,
-                    'path': image.image_path
+                    'path': filename
                 }
             })
         except Exception as e:
             db.session.rollback()
+            # Hata durumunda dosyayı temizle
+            if 'file_path' in locals() and os.path.exists(file_path):
+                os.remove(file_path)
             return jsonify({'success': False, 'message': str(e)})
             
     return jsonify({'success': False, 'message': 'Desteklenmeyen dosya türü'})
@@ -317,14 +326,76 @@ def delete_product_image(image_id):
         image = ProductImage.query.get_or_404(image_id)
         
         # Görsel dosyasını sil
-        image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], image.image_path)
+        image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'products', image.image_path)
         if os.path.exists(image_path):
             os.remove(image_path)
+            
+        # Eğer bu ana görsel ise ve başka görseller varsa, ilk görseli ana görsel yap
+        if image.is_primary and image.product_id:
+            next_image = ProductImage.query.filter_by(
+                product_id=image.product_id
+            ).filter(ProductImage.id != image.id).first()
+            if next_image:
+                next_image.is_primary = True
             
         # Veritabanından sil
         db.session.delete(image)
         db.session.commit()
         
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)})
+
+@admin_bp.route('/products/set-primary-image', methods=['POST'])
+@login_required
+@admin_required
+def set_primary_image():
+    try:
+        data = request.get_json()
+        image_id = data.get('image_id')
+        
+        if not image_id:
+            return jsonify({'success': False, 'message': 'Görsel ID gerekli'})
+            
+        image = ProductImage.query.get_or_404(image_id)
+        
+        # Eski ana görseli güncelle
+        if image.product_id:
+            old_primary = ProductImage.query.filter_by(
+                product_id=image.product_id,
+                is_primary=True
+            ).first()
+            if old_primary:
+                old_primary.is_primary = False
+        
+        # Yeni ana görseli ayarla
+        image.is_primary = True
+        db.session.commit()
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)})
+
+@admin_bp.route('/products/reorder-images', methods=['POST'])
+@login_required
+@admin_required
+def reorder_images():
+    try:
+        data = request.get_json()
+        image_ids = data.get('image_ids', [])
+        
+        if not image_ids:
+            return jsonify({'success': False, 'message': 'Görsel sıralaması gerekli'})
+            
+        # Sıralamayı güncelle
+        for index, image_id in enumerate(image_ids):
+            image = ProductImage.query.get(image_id)
+            if image:
+                image.order = index
+                
+        db.session.commit()
         return jsonify({'success': True})
     except Exception as e:
         db.session.rollback()

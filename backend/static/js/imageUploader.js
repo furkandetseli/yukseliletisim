@@ -10,6 +10,7 @@ class ImageUploadHandler {
         this.currentFiles = new Set();
         this.uploadQueue = [];
         this.errors = [];
+        this.sortable = null;
         
         this.init();
     }
@@ -17,17 +18,34 @@ class ImageUploadHandler {
     init() {
         this.initializeExistingImages();
         this.setupEventListeners();
+        this.initializeSortable();
     }
 
     initializeExistingImages() {
         // Mevcut görselleri sayıya dahil et
         const existingImages = this.previewContainer.querySelectorAll('.image-item');
-        existingImages.forEach(img => this.currentFiles.add(img.dataset.id));
+        existingImages.forEach(img => {
+            this.currentFiles.add(img.dataset.id);
+            this.setupImageActions(img);
+        });
+        this.updateImageCountStatus();
     }
 
-    // imageUploader.js içinde setupEventListeners metodunu güncelleyin
+    initializeSortable() {
+        // Sortable.js ile sıralama özelliği
+        this.sortable = new Sortable(this.previewContainer, {
+            animation: 150,
+            handle: '.image-preview', // Sadece görsel alanından tutarak sıralama
+            ghostClass: 'sortable-ghost',
+            onEnd: async (evt) => {
+                const imageIds = Array.from(this.previewContainer.children)
+                    .map(item => item.dataset.id);
+                await this.updateImageOrder(imageIds);
+            }
+        });
+    }
+
     setupEventListeners() {
-        // Sürükle-bırak olayları
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             this.dropzone.addEventListener(eventName, (e) => {
                 e.preventDefault();
@@ -35,7 +53,6 @@ class ImageUploadHandler {
             });
         });
 
-        // Sürükleme efektleri
         ['dragenter', 'dragover'].forEach(eventName => {
             this.dropzone.addEventListener(eventName, () => {
                 this.dropzone.classList.add('dragover');
@@ -48,30 +65,27 @@ class ImageUploadHandler {
             });
         });
 
-        // Dosya bırakma olayı
         this.dropzone.addEventListener('drop', (e) => {
             const files = Array.from(e.dataTransfer.files);
             this.handleFiles(files);
         });
 
-        // Tıklama ile dosya seçme
         this.dropzone.addEventListener('click', () => {
-            const fileInput = document.getElementById('fileInput');
-            if (fileInput) {
-                fileInput.click();
-            }
-        });
-
-        // Dosya seçildiğinde
-        const fileInput = document.getElementById('fileInput');
-        if (fileInput) {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.multiple = true;
+            fileInput.accept = this.allowedTypes.join(',');
+            fileInput.style.display = 'none';
+            
             fileInput.addEventListener('change', (e) => {
                 const files = Array.from(e.target.files);
                 this.handleFiles(files);
-                // Input'u temizle ki aynı dosyayı tekrar seçebilsin
-                fileInput.value = '';
             });
-        }
+            
+            document.body.appendChild(fileInput);
+            fileInput.click();
+            document.body.removeChild(fileInput);
+        });
     }
 
     async handleFiles(files) {
@@ -135,6 +149,7 @@ class ImageUploadHandler {
         } finally {
             this.uploadQueue = [];
             uploadProgress.remove();
+            this.updateImageCountStatus();
         }
     }
 
@@ -144,8 +159,12 @@ class ImageUploadHandler {
         formData.append('csrf_token', this.csrfToken);
 
         try {
-            // Yükleme çubuğunu güncelle
-            progressElement.innerHTML = `<div class="progress-text">${file.name} yükleniyor...</div>`;
+            progressElement.innerHTML = `
+                <div class="progress">
+                    <div class="progress-text">${file.name} yükleniyor...</div>
+                    <div class="progress-bar"></div>
+                </div>
+            `;
 
             const response = await fetch('/admin/products/upload-image', {
                 method: 'POST',
@@ -157,6 +176,7 @@ class ImageUploadHandler {
             if (data.success) {
                 this.currentFiles.add(data.image.id);
                 this.addImagePreview(data.image);
+                this.showSuccess(`${file.name} başarıyla yüklendi`);
             } else {
                 throw new Error(data.message || 'Yükleme başarısız');
             }
@@ -175,17 +195,22 @@ class ImageUploadHandler {
             <div class="image-preview">
                 <img src="/static/images/products/${image.path}" alt="">
                 <div class="image-overlay">
-                    <button type="button" class="btn-primary make-primary" ${
-                        this.currentFiles.size === 1 ? 'disabled' : ''
-                    }>
-                        Ana Görsel Yap
-                    </button>
-                    <button type="button" class="btn-danger delete-image">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div class="image-actions">
+                        <button type="button" class="btn-primary make-primary" ${
+                            this.currentFiles.size === 1 ? 'disabled' : ''
+                        }>
+                            <i class="fas fa-star"></i> Ana Görsel Yap
+                        </button>
+                        <button type="button" class="btn-danger delete-image">
+                            <i class="fas fa-trash"></i> Sil
+                        </button>
+                    </div>
                 </div>
             </div>
             ${this.currentFiles.size === 1 ? '<div class="primary-badge">Ana Görsel</div>' : ''}
+            <div class="image-order-handle">
+                <i class="fas fa-grip-vertical"></i>
+            </div>
         `;
 
         this.previewContainer.appendChild(div);
@@ -193,7 +218,6 @@ class ImageUploadHandler {
     }
 
     setupImageActions(imageElement) {
-        // Ana görsel yapma
         const makePrimaryBtn = imageElement.querySelector('.make-primary');
         if (makePrimaryBtn) {
             makePrimaryBtn.addEventListener('click', async () => {
@@ -212,6 +236,7 @@ class ImageUploadHandler {
                     const data = await response.json();
                     if (data.success) {
                         this.updatePrimaryImage(imageElement);
+                        this.showSuccess('Ana görsel güncellendi');
                     }
                 } catch (error) {
                     this.showError('Ana görsel ayarlanırken bir hata oluştu');
@@ -219,11 +244,10 @@ class ImageUploadHandler {
             });
         }
 
-        // Görsel silme
         const deleteBtn = imageElement.querySelector('.delete-image');
         if (deleteBtn) {
             deleteBtn.addEventListener('click', () => {
-                if (confirm('Bu görseli silmek istediğinizden emin misiniz?')) {
+                if (confirm('Bu görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
                     this.deleteImage(imageElement);
                 }
             });
@@ -231,6 +255,11 @@ class ImageUploadHandler {
     }
 
     async deleteImage(imageElement) {
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'loading-overlay';
+        loadingOverlay.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        imageElement.appendChild(loadingOverlay);
+
         try {
             const response = await fetch(`/admin/products/delete-image/${imageElement.dataset.id}`, {
                 method: 'POST',
@@ -244,9 +273,43 @@ class ImageUploadHandler {
                 this.currentFiles.delete(imageElement.dataset.id);
                 imageElement.remove();
                 this.updateImageCountStatus();
+                this.showSuccess('Görsel başarıyla silindi');
+
+                // Eğer silinen görsel ana görsel ise, ilk görseli ana görsel yap
+                if (imageElement.querySelector('.primary-badge')) {
+                    const firstImage = this.previewContainer.querySelector('.image-item');
+                    if (firstImage) {
+                        this.updatePrimaryImage(firstImage);
+                    }
+                }
+            } else {
+                throw new Error(data.message || 'Silme işlemi başarısız');
             }
         } catch (error) {
+            imageElement.removeChild(loadingOverlay);
             this.showError('Görsel silinirken bir hata oluştu');
+        }
+    }
+
+    async updateImageOrder(imageIds) {
+        try {
+            const response = await fetch('/admin/products/reorder-images', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.csrfToken
+                },
+                body: JSON.stringify({ image_ids: imageIds })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                this.showSuccess('Görsel sıralaması güncellendi');
+            } else {
+                throw new Error(data.message || 'Sıralama güncellenemedi');
+            }
+        } catch (error) {
+            this.showError('Sıralama güncellenirken bir hata oluştu');
         }
     }
 
@@ -266,23 +329,15 @@ class ImageUploadHandler {
         newPrimaryElement.appendChild(primaryBadge);
     }
 
-    showErrors() {
-        if (this.errors.length > 0) {
-            const errorMessages = this.errors.join('\n');
-            
-            // Toastify kullanarak hataları göster
-            Toastify({
-                text: errorMessages,
-                duration: 5000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: "#dc3545",
-                stopOnFocus: true,
-                close: true
-            }).showToast();
-
-            this.errors = []; // Hataları temizle
-        }
+    showSuccess(message) {
+        Toastify({
+            text: message,
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#28a745",
+            stopOnFocus: true
+        }).showToast();
     }
 
     showError(message) {
@@ -296,9 +351,25 @@ class ImageUploadHandler {
         }).showToast();
     }
 
+    showErrors() {
+        if (this.errors.length > 0) {
+            const errorMessages = this.errors.join('\n');
+            Toastify({
+                text: errorMessages,
+                duration: 5000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#dc3545",
+                stopOnFocus: true,
+                close: true
+            }).showToast();
+            this.errors = [];
+        }
+    }
+
     updateImageCountStatus() {
         const remainingSlots = this.maxFiles - this.currentFiles.size;
-        const statusText = document.querySelector('.dropzone small');
+        const statusText = this.dropzone.querySelector('small');
         if (statusText) {
             statusText.textContent = `${remainingSlots} görsel daha ekleyebilirsiniz (max ${this.maxFiles})`;
         }

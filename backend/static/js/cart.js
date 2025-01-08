@@ -1,77 +1,5 @@
 // cart.js
 document.addEventListener('DOMContentLoaded', function() {
-    // Sepet özeti toggle fonksiyonu
-    function initializeCartSummary() {
-        const cartSummaryToggle = document.querySelector('.cart-summary-toggle');
-        const cartSidebar = document.querySelector('.cart-sidebar');
-        
-        if (cartSummaryToggle && cartSidebar) {
-            // Toggle butonuna tıklama
-            cartSummaryToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                cartSidebar.classList.toggle('active');
-                this.classList.toggle('active');
-                
-                // Body scroll lock when summary is open
-                if (cartSidebar.classList.contains('active')) {
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    document.body.style.overflow = '';
-                }
-            });
-
-            // Sayfa kaydırıldığında sepet özetini kapat
-            let lastScrollTop = 0;
-            let scrollTimeout;
-            
-            window.addEventListener('scroll', function() {
-                if (scrollTimeout) {
-                    clearTimeout(scrollTimeout);
-                }
-                
-                scrollTimeout = setTimeout(function() {
-                    const st = window.pageYOffset || document.documentElement.scrollTop;
-                    if (st > lastScrollTop && cartSidebar.classList.contains('active')) {
-                        cartSidebar.classList.remove('active');
-                        cartSummaryToggle.classList.remove('active');
-                        document.body.style.overflow = '';
-                    }
-                    lastScrollTop = st <= 0 ? 0 : st;
-                }, 50);
-            }, false);
-
-            // Dışarı tıklandığında kapat
-            document.addEventListener('click', function(e) {
-                if (cartSidebar.classList.contains('active') &&
-                    !cartSidebar.contains(e.target) &&
-                    !cartSummaryToggle.contains(e.target)) {
-                    cartSidebar.classList.remove('active');
-                    cartSummaryToggle.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
-
-            // Toplam fiyat güncellendiğinde toggle butonundaki fiyatı da güncelle
-            const updateToggleTotal = function() {
-                const totalAmount = document.querySelector('.total-amount');
-                const toggleTotal = cartSummaryToggle.querySelector('.toggle-total .total-amount');
-                if (totalAmount && toggleTotal) {
-                    toggleTotal.textContent = totalAmount.textContent;
-                }
-            };
-
-            // MutationObserver ile fiyat değişikliklerini izle
-            const totalAmount = document.querySelector('.total-amount');
-            if (totalAmount) {
-                const observer = new MutationObserver(updateToggleTotal);
-                observer.observe(totalAmount, { childList: true, characterData: true, subtree: true });
-            }
-        }
-    }
-
-    // Sayfa yüklendiğinde sepet özetini initialize et
-    initializeCartSummary();
-
     // Sepete Ekleme Butonu Event Listener - Bunu ekleyelim
     document.querySelectorAll('.add-to-cart-btn:not(.disabled)').forEach(button => {
         button.addEventListener('click', function() {
@@ -274,25 +202,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (isProcessing) return;
                 isProcessing = true;
 
-                const cartItem = this.closest('.cart-item');
-                const input = cartItem.querySelector('.quantity-input');
-                const itemTotalElement = cartItem.querySelector('.item-total');
-                const productId = cartItem.dataset.productId;
-                const itemPrice = parseFloat(cartItem.dataset.price);
+                const input = this.closest('.quantity-selector').querySelector('.quantity-input');
+                const productId = this.closest('.cart-item').dataset.productId;
                 let currentValue = parseInt(input.value);
 
                 try {
                     if (this.classList.contains('minus')) {
                         currentValue = Math.max(1, currentValue - 1);
+                        console.log("Minus clicked");
                     } else {
                         currentValue = Math.min(99, currentValue + 1);
+                        console.log("Plus clicked");
                     }
 
                     input.value = currentValue;
-                    
-                    // Ürün toplam fiyatını güncelle
-                    const newTotal = itemPrice * currentValue;
-                    itemTotalElement.textContent = `${newTotal.toFixed(2)} TL`;
 
                     const response = await fetch(`/cart/update/${productId}`, {
                         method: 'POST',
@@ -309,16 +232,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         updateCartTotals();
                         showNotification('Sepet güncellendi', 'success');
                     } else {
-                        // Hata durumunda eski değerlere dön
-                        input.value = currentValue - 1;
-                        itemTotalElement.textContent = `${(itemPrice * (currentValue - 1)).toFixed(2)} TL`;
                         throw new Error(data.message || 'Güncelleme başarısız oldu');
                     }
 
                 } catch (error) {
                     console.error('Error:', error);
                     input.value = currentValue - 1;
-                    itemTotalElement.textContent = `${(itemPrice * (currentValue - 1)).toFixed(2)} TL`;
                     showNotification('Bir hata oluştu', 'error');
                 } finally {
                     // İşlem bittiğinde flag'i resetle ve butonu aktif et
@@ -337,16 +256,41 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sepete ekleme işlemi
     async function addToCart(productId, quantity = 1) {
         try {
+            // Quantity'nin sayı olduğundan emin ol
+            quantity = parseInt(quantity);
+            if (isNaN(quantity) || quantity < 1) {
+                quantity = 1;
+            }
+            
+            // CSRF token'ı al
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (!csrfToken) {
+                console.error('CSRF token bulunamadı');
+                throw new Error('CSRF token bulunamadı');
+            }
+
+            console.log('Request details:', {
+                url: `/cart/add/${productId}`,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: { quantity: quantity }
+            });
+            
             const response = await fetch(`/cart/add/${productId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    'X-CSRFToken': csrfToken
                 },
                 body: JSON.stringify({ quantity: quantity })
             });
 
+            console.log('Response status:', response.status);
             const data = await response.json();
+            console.log('Response data:', data);
 
             if (data.success) {
                 updateCartCount(data.cart_count);

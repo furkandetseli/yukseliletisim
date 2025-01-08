@@ -191,11 +191,30 @@ def create_app():
     @app.route('/cart/add/<int:product_id>', methods=['POST'])
     def add_to_cart(product_id):
         try:
+            if not request.is_json:
+                print(f"Request Content-Type: {request.content_type}")  # Debug için log
+                print(f"Request data: {request.get_data()}")  # Debug için log
+                return jsonify({
+                    'success': False,
+                    'message': 'JSON verisi gerekli'
+                }), 400
+                
             data = request.get_json()
+            if data is None:
+                return jsonify({
+                    'success': False,
+                    'message': 'Geçersiz JSON verisi'
+                }), 400
+                
             quantity = data.get('quantity', 1)
+            if not isinstance(quantity, int) or quantity < 1:
+                return jsonify({
+                    'success': False,
+                    'message': 'Geçersiz miktar'
+                }), 400
             
             # Ürünü veritabanından al
-            product = Product.session.get_or_404(product_id)
+            product = Product.query.get_or_404(product_id)
             
             # Stok kontrolü
             if not product:

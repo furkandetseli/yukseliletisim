@@ -88,8 +88,7 @@
                                 </div>
 
                                 {% if product.stock > 0 %}
-                                <button onclick="event.preventDefault(); addToCart('{{ product.id }}')" 
-                                        class="add-to-cart-btn">
+                                <button class="add-to-cart-btn" data-product-id="{{ product.id }}">
                                     <i class="fas fa-shopping-cart"></i>
                                     Sepete Ekle
                                 </button>
@@ -235,8 +234,7 @@
                                 </div>
 
                                 {% if product.stock > 0 %}
-                                <button onclick="event.preventDefault(); addToCart('{{ product.id }}')" 
-                                        class="add-to-cart-btn">
+                                <button class="add-to-cart-btn" data-product-id="{{ product.id }}">
                                     <i class="fas fa-shopping-cart"></i>
                                     Sepete Ekle
                                 </button>
@@ -442,45 +440,6 @@ window.addEventListener('resize', () => {
     initSlider('featured');
     initSlider('new');
 });
-
-function addToCart(productId) {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    
-    fetch(`/cart/add/${productId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Cart count güncelleme
-            const cartCount = document.querySelector('.cart-count');
-            if (cartCount) {
-                cartCount.textContent = data.cart_count;
-            }
-            
-            // Başarılı animasyonu göster
-            const btn = document.querySelector(`[onclick="addToCart('${productId}')"]`);
-            if (btn) {
-                btn.innerHTML = '<i class="fas fa-check"></i> Eklendi';
-                btn.classList.add('success');
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="fas fa-shopping-cart"></i> Sepete Ekle';
-                    btn.classList.remove('success');
-                }, 2000);
-            }
-        } else {
-            alert('Bir hata oluştu!');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Bir hata oluştu!');
-    });
-}
 
 // Lazy loading için Intersection Observer
 document.addEventListener('DOMContentLoaded', function() {

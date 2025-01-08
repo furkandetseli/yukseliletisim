@@ -12,8 +12,8 @@
 
         {% if cart_items %}
             <div class="cart-content">
-                <!-- Sol Taraf - Sepet Ürünleri -->
-                <div class="cart-items-wrapper">
+                <div class="cart-grid">
+                    <!-- Sol Taraf - Sepet Ürünleri -->
                     <div class="cart-items">
                         {% for item in cart_items %}
                         <div class="cart-item" data-product-id="{{ item.product.id }}" data-price="{{ item.product.price }}">
@@ -76,20 +76,10 @@
                         </div>
                         {% endfor %}
                     </div>
-                </div>
 
-                <!-- Sağ Taraf - Sepet Özeti -->
-                <div class="cart-sidebar">
-                    <!-- Mobil için toggle butonu -->
-                    <button class="cart-summary-toggle">
-                        <div class="toggle-content">
-                            <span class="toggle-label">Sepet Özeti</span>
-                            <span class="toggle-total">Toplam: <span class="total-amount">{{ "%.2f"|format(subtotal if subtotal >= 1000 else subtotal + 29.90) }} TL</span></span>
-                        </div>
-                        <i class="fas fa-chevron-up"></i>
-                    </button>
-                    
-                    <div class="cart-summary">
+                    <!-- Sağ Taraf - Sepet Özeti -->
+                    <div class="cart-sidebar">
+                        <div class="cart-summary">
                             <h2>Sipariş Özeti</h2>
                             
                             <div class="summary-row">
@@ -137,13 +127,14 @@
                                 <i class="fas fa-shield-alt"></i>
                                 <span>256-bit SSL ile güvenli ödeme</span>
                             </div>
-                    </div>
+                        </div>
 
-                    <div class="continue-shopping">
-                        <a href="{{ url_for('index') }}" class="continue-link">
-                            <i class="fas fa-arrow-left"></i>
-                            Alışverişe Devam Et
-                        </a>
+                        <div class="continue-shopping">
+                            <a href="{{ url_for('index') }}" class="continue-link">
+                                <i class="fas fa-arrow-left"></i>
+                                Alışverişe Devam Et
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

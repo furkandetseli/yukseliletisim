@@ -9,7 +9,8 @@
     display: grid;
     grid-template-columns: 2fr 400px;
     gap: 2rem;
-    align-items: start;
+    align-items: flex-start;
+    position: relative;
 }
 
 .cart-items {
@@ -17,6 +18,7 @@
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     overflow: hidden;
+    height: fit-content;
 }
 
 .cart-item {
@@ -165,7 +167,7 @@
 .cart-sidebar {
     position: sticky;
     top: 1rem;
-    transition: transform 0.3s ease-in-out;
+    height: fit-content;
     background: white;
 }
 
@@ -327,33 +329,7 @@
     color: white;
 }
 
-/* Responsive Tasarım */
-@media (max-width: 1200px) {
-.cart-content {
-    display: grid;
-    grid-template-columns: 2fr 400px;
-    gap: 2rem;
-    align-items: flex-start;
-    position: relative;
-}
-
-.cart-items {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    overflow: hidden;
-    height: fit-content;
-}
-
-/* Cart Summary Styles */
-.cart-sidebar {
-    position: sticky;
-    top: 1rem;
-    height: fit-content;
-    background: white;
-    transition: transform 0.3s ease-in-out;
-}
-
+/* Masaüstü için özel stiller */
 @media screen and (min-width: 993px) {
     .cart-sidebar {
         display: block !important;
@@ -364,6 +340,30 @@
         display: block !important;
     }
 }
+
+/* Responsive Tasarım */
+@media (max-width: 1200px) {
+    .cart-content {
+        grid-template-columns: 1.5fr 350px;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .cart-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .cart-summary-toggle {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: white;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    }
     
     .cart-sidebar {
         position: fixed;
@@ -400,11 +400,6 @@
     .cart-summary::-webkit-scrollbar {
         width: 0px;
         background: transparent;
-    }
-
-    /* Mobil görünümde scroll çubuğunu gizle ama işlevselliğini koru */
-    .cart-summary::-webkit-scrollbar {
-        width: 0px;
     }
     
     /* Overlay arka plan */

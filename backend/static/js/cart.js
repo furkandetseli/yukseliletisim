@@ -61,12 +61,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
             console.log('New value:', newValue);
 
-            // Input ve toplam değeri hemen güncelle
+            // Input ve toplam değerleri güncelle
             input.value = newValue;
             const newTotal = itemPrice * newValue;
-
-            console.log('Updating item total from', itemTotalElement.textContent, 'to', `${newTotal.toFixed(2)} TL`);
+            
+            // Ürün toplam fiyatını güncelle
             itemTotalElement.textContent = `${newTotal.toFixed(2)} TL`;
+            
+            // Genel toplamı güncelle
+            updateCartTotals();
 
             try {
                 // Backend'e gönder
@@ -202,20 +205,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (isProcessing) return;
                 isProcessing = true;
 
-                const input = this.closest('.quantity-selector').querySelector('.quantity-input');
-                const productId = this.closest('.cart-item').dataset.productId;
+                const cartItem = this.closest('.cart-item');
+                const input = cartItem.querySelector('.quantity-input');
+                const itemTotalElement = cartItem.querySelector('.item-total');
+                const productId = cartItem.dataset.productId;
+                const itemPrice = parseFloat(cartItem.dataset.price);
                 let currentValue = parseInt(input.value);
 
                 try {
                     if (this.classList.contains('minus')) {
                         currentValue = Math.max(1, currentValue - 1);
-                        console.log("Minus clicked");
                     } else {
                         currentValue = Math.min(99, currentValue + 1);
-                        console.log("Plus clicked");
                     }
 
+                    // Input değerini ve toplam fiyatı güncelle
                     input.value = currentValue;
+                    const newTotal = itemPrice * currentValue;
+                    itemTotalElement.textContent = `${newTotal.toFixed(2)} TL`;
 
                     const response = await fetch(`/cart/update/${productId}`, {
                         method: 'POST',
@@ -332,13 +339,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 showNotification('Ürün sepetten kaldırıldı', 'success');
                 // Sayfayı yenile
-                window.location.reload();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
             } else {
                 showNotification(data.message || 'Bir hata oluştu', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
             showNotification('Bir hata oluştu', 'error');
+            // Hata durumunda da sayfayı yenile
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
         }
     }
 

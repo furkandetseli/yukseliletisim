@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/product.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/default-logo1.png') }}">
     
 
@@ -41,9 +42,9 @@
                 </a>
             </div>
             <div class="header-menu">
-                <a href="{{ url_for('index') }}">Hakkımızda</a>
+                <a href="{{ url_for('about') }}">Hakkımızda</a>
                 <a href="{{ url_for('index') }}">Yardım</a>
-                <a href="{{ url_for('index') }}">İletişim</a>
+                <a href="{{ url_for('contact') }}">İletişim</a>
                 <a href="{{ url_for('index') }}">
                     <i class="fas fa-truck"></i>
                     Sipariş Takibi
@@ -334,6 +335,9 @@
             <!-- Alt Footer -->
             <div class="footer-bottom">
                 <p>&copy; 2024 Yüksel İletişim. Tüm hakları saklıdır.</p>
+                <div class="made-by">
+                    <p>made in furkan detseli</p>
+                </div>
             </div>
         </div>
     </footer>

@@ -387,6 +387,14 @@ def create_app():
         
         return render_template('search.html', products=products, query=query)
 
+    @app.route('/hakkımızda')
+    def about():
+        return render_template('about.html')
+
+    @app.route('/iletisim')
+    def contact():
+        return render_template('contact.html')
+
     @app.route('/static/images/products/<path:filename>')
     def product_images(filename):
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)

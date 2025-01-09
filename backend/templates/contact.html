@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="contact-container">
+    <h1>İletişim</h1>
+    
+    <div class="contact-content">
+        <section class="contact-info">
+            <h2>İletişim Bilgileri</h2>
+            <div class="info-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <p>
+                    Yüksel İletişim A.Ş.<br>
+                    Teknopark Mahallesi, No: 123<br>
+                    34500 İstanbul/Türkiye
+                </p>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-phone"></i>
+                <p>+90 539 586 2718</p>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-envelope"></i>
+                <p>info@yukseliletisim.com</p>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-clock"></i>
+                <p>
+                    Çalışma Saatleri:<br>
+                    Pazartesi - Cuma: 09:00 - 18:00<br>
+                    Cumartesi: 10:00 - 15:00
+                </p>
+            </div>
+        </section>
+
+        <section class="contact-form">
+            <h2>Bize Ulaşın</h2>
+            <form action="/contact" method="POST">
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="Adınız Soyadınız" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="E-posta Adresiniz" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" name="subject" placeholder="Konu" required>
+                </div>
+                <div class="form-group">
+                    <textarea name="message" placeholder="Mesajınız" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Gönder</button>
+            </form>
+        </section>
+    </div>
+
+    <div class="map-container">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3010.279615810936!2d28.97885931541303!3d41.00846297929962!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab9eb9d587135%3A0x8aa0bb6b1dd6ffb7!2sIstanbul%20Technical%20University!5e0!3m2!1sen!2str!4v1642000000000!5m2!1sen!2str" 
+                width="100%" 
+                height="400" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy">
+        </iframe>
+    </div>
+</div>
+{% endblock %}

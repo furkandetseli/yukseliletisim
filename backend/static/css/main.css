@@ -499,18 +499,62 @@ body {
 }
 
 .nav-link i {
-    margin-left: 6px;
+    margin-left: 8px;
     font-size: 12px;
-    transition: transform 0.3s;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.nav-item:hover .nav-link i {
+    opacity: 1;
+}
+
+/* Dropdown açılış/kapanış animasyonu */
+.mega-menu {
+    transform: translateX(-50%) translateY(15px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-item.has-dropdown:hover .mega-menu {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Dropdown arka plan efekti */
+.nav-item.has-dropdown::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #1a73e8;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.nav-item.has-dropdown:hover::before {
+    width: 100%;
 }
 
 .nav-link:hover {
     color: #1a73e8;
-    background: #f8f9fa;
+    background: rgba(26, 115, 232, 0.05);
+}
+
+.nav-item:hover .nav-link {
+    color: #1a73e8;
 }
 
 .nav-item:hover .nav-link i {
     transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+.nav-item.has-dropdown:hover .mega-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    transition: all 0.3s ease-in-out;
 }
 
 /* Mega Menü */

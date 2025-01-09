@@ -134,6 +134,12 @@
         padding: 15px;
     }
 
+    .mobile-menu .logo img {
+        width: 130px;
+        height: 50px;
+        object-fit: contain;
+    }
+
     /* Mobil menü liste öğeleri */
     .mobile-nav-item {
         border-bottom: 1px solid #eee;
@@ -157,6 +163,12 @@
         display: none;
         background: #f8f9fa;
         padding-left: 15px;
+        position: relative;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
     }
 
     .mobile-submenu.active {
@@ -387,6 +399,11 @@
     background: #f8f9fa;
     overflow: hidden;
     transition: max-height 0.3s ease-out;
+    position: relative;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .mobile-submenu.active {

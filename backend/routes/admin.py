@@ -13,7 +13,7 @@ import string
 from flask_login import login_required, current_user
 from functools import wraps
 from models import *
-from models import User, Product, Order, OrderItem, Category, Brand
+from models import User, Product, Order, OrderItem, Category, Brand, ProductImage
 from extensions import db
 from werkzeug.utils import secure_filename
 import os
@@ -133,7 +133,6 @@ def add_product():
                 description=description,
                 is_active=True
             )
-            
             db.session.add(product)
             db.session.flush()  # ID almak için
 
@@ -146,7 +145,7 @@ def add_product():
 
                 for index, image in enumerate(images):
                     if image and image.filename:
-                        filename = secure_filename(f"{product.stock_code}_{index}_{image.filename}")
+                        filename = secure_filename(f"{product.id}_{index}_{image.filename}")
                         image_path = os.path.join(upload_folder, filename)
                         image.save(image_path)
 
@@ -155,6 +154,7 @@ def add_product():
                             image_path=filename,
                             is_primary=(index == 0)  # İlk görsel ana görsel
                         )
+                        db.session.add(product_image)
                         db.session.add(product_image)
 
             db.session.commit()

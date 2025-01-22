@@ -260,6 +260,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sayfa yüklendiğinde butonları initialize et
     initializeQuantityButtons();
 
+    // Mobil cihaz kontrolü
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
     // Sepete ekleme işlemi
     async function addToCart(productId, quantity = 1) {
         try {
@@ -276,32 +281,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error('CSRF token bulunamadı');
             }
 
-            console.log('Request details:', {
-                url: `/cart/add/${productId}`,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
-                },
-                body: { quantity: quantity }
-            });
-            
-            const response = await fetch(`/cart/add/${productId}`, {
+            // Mobil cihazlar için özel ayarlar
+            const isMobile = isMobileDevice();
+            const fetchOptions = {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrfToken
                 },
                 body: JSON.stringify({ quantity: quantity })
-            });
+            };
 
-            console.log('Response status:', response.status);
+            // Mobil cihazlarda timeout süresi
+            if (isMobile) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                fetchOptions.signal = controller.signal;
+            }
+
+            const response = await fetch(`/cart/add/${productId}`, fetchOptions);
+
+            if (isMobile) {
+                clearTimeout(timeoutId);
+            }
+
             const data = await response.json();
-            console.log('Response data:', data);
 
             if (data.success) {
                 updateCartCount(data.cart_count);
-                showNotification('Ürün sepete eklendi', 'success');
+                
+                // Mobil cihazlar için farklı bildirim
+                if (isMobile) {
+                    showMobileNotification('Ürün sepete eklendi', 'success');
+                } else {
+                    showNotification('Ürün sepete eklendi', 'success');
+                }
                 
                 // Sepete ekle butonuna animasyon ekle
                 const button = document.querySelector(`[data-product-id="${productId}"]`);
@@ -311,6 +325,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         button.classList.remove('added');
                     }, 2000);
                 }
+
+                // Mobil cihazlarda sayfa yenileme yerine sepete yönlendirme
+                if (isMobile) {
+                    window.location.href = '/cart';
+                    return;
+                }
             } else if (data.error === 'product_not_found') {
                 showNotification('Ürün artık mevcut değil', 'error');
                 removeFromCart(productId);
@@ -319,8 +339,44 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error:', error);
-            showNotification('Bir hata oluştu', 'error');
+            
+            // Mobil cihazlar için özel hata mesajı
+            if (error.name === 'AbortError') {
+                showMobileNotification('İşlem zaman aşımına uğradı, lüttekrar deneyin', 'error');
+            } else {
+                showNotification('Bir hata oluştu', 'error');
+            }
+            
+            // Butonu eski haline getir
+            const button = document.querySelector(`[data-product-id="${productId}"]`);
+            if (button) {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-shopping-cart"></i> Sepete Ekle';
+            }
         }
+    }
+
+    // Mobil cihazlar için bildirim sistemi
+    function showMobileNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `mobile-notification ${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'times-circle'}"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animasyon ekle
+        setTimeout(() => notification.classList.add('show'), 100);
+        
+        // Bildirimi kaldır
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
 
     // Sepetten ürün kaldırma

@@ -1,6 +1,6 @@
 # app.py
 from waitress import serve
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory, send_file
 from flask_login import current_user, login_user, logout_user, login_required
 import os
 from flask_wtf.csrf import CSRFProtect
@@ -458,6 +458,10 @@ def create_app():
             'cart_count': get_cart_count(),
             'categories': get_categories()  # Kategorileri ekledik
         }
+
+    @app.route('/sitemap.xml')
+    def sitemap():
+        return send_file('sitemap.xml', mimetype='application/xml')
 
     return app
 

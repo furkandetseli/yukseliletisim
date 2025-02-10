@@ -5,11 +5,142 @@
     border-radius: 4px;
     padding: 8px 15px;
     margin: 5px;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .nav-link.teknik-servis:hover {
     background-color: #0056b3;
-    color: white !important;
-    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.nav-link.teknik-servis i {
+    margin-right: 8px;
+}
+
+/* Teknik Servis Sayfası Stilleri */
+.teknik-servis-container {
+    padding: 40px 0;
+}
+
+.teknik-servis-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.teknik-servis-header h1 {
+    color: #333;
+    font-size: 32px;
+    margin-bottom: 15px;
+}
+
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.service-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+}
+
+.service-card h3 {
+    color: #007bff;
+    font-size: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.service-card h3 i {
+    margin-right: 10px;
+}
+
+.service-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.service-card ul li {
+    margin-bottom: 10px;
+    padding-left: 25px;
+    position: relative;
+}
+
+.service-card ul li:before {
+    content: "\f00c";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: #28a745;
+    position: absolute;
+    left: 0;
+}
+
+.contact-info-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 30px;
+    margin-top: 40px;
+}
+
+.contact-info-card h3 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.contact-info-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.contact-info-item {
+    display: flex;
+    align-items: center;
+}
+
+.contact-info-item i {
+    font-size: 24px;
+    color: #007bff;
+    margin-right: 15px;
+}
+
+.important-notice {
+    background: #e7f5ff;
+    border-left: 4px solid #007bff;
+    padding: 20px;
+    margin-top: 40px;
+    border-radius: 0 8px 8px 0;
+}
+
+.important-notice h4 {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+/* Responsive Tasarım */
+@media (max-width: 768px) {
+    .service-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-info-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .teknik-servis-header h1 {
+        font-size: 24px;
+    }
+    
+    .service-card {
+        padding: 20px;
+    }
 } 

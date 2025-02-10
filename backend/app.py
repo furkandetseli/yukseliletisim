@@ -463,6 +463,10 @@ def create_app():
     def sitemap():
         return send_file('sitemap.xml', mimetype='application/xml')
 
+    @app.route('/teknik-servis')
+    def teknik_servis():
+        return render_template('teknik-servis.html')
+
     return app
 
 app = create_app()

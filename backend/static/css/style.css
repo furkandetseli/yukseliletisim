@@ -1,0 +1,15 @@
+/* Teknik Servis Link Stili */
+.nav-link.teknik-servis {
+    background-color: #007bff;
+    color: white !important;
+    border-radius: 4px;
+    padding: 8px 15px;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.nav-link.teknik-servis:hover {
+    background-color: #0056b3;
+    color: white !important;
+    text-decoration: none;
+} 

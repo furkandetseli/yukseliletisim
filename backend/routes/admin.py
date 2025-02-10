@@ -768,3 +768,9 @@ def delete_brand(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500
+
+@admin_bp.route('/teknik-servis', methods=['GET'])
+@login_required
+@admin_required
+def teknik_servis():
+    return render_template('admin/teknik_servis.html')

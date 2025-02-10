@@ -3,42 +3,111 @@
 {% block content %}
 <div class="teknik-servis-container">
     <div class="container">
-        <div class="teknik-servis-header">
-            <h1>Teknik Servis Hizmetlerimiz</h1>
+        <!-- Hero Section -->
+        <div class="teknik-servis-hero">
+            <div class="hero-content">
+                <h1>Profesyonel Teknik Servis Hizmetleri</h1>
+                <p>Uzman kadromuz ile tüm mobil cihazlarınız için çözüm sunuyoruz</p>
+            </div>
         </div>
 
+        <!-- Hizmet Kartları -->
         <div class="service-grid">
             <div class="service-card">
+                <div class="service-card-image">
+                    <img src="{{ url_for('static', filename='images/teknik-servis/phone-repair.jpg') }}" 
+                         alt="Telefon Tamiri">
+                </div>
                 <h3><i class="fas fa-mobile-alt"></i> Telefon Tamiri</h3>
                 <ul>
                     <li>Ekran Değişimi</li>
                     <li>Batarya Değişimi</li>
                     <li>Şarj Soketi Tamiri</li>
                     <li>Yazılım Güncelleme</li>
+                    <li>Kamera Değişimi</li>
+                    <li>Hoparlör Değişimi</li>
                 </ul>
+                <div class="service-brands">
+                    <span>iPhone</span>
+                    <span>Samsung</span>
+                    <span>Xiaomi</span>
+                    <span>Huawei</span>
+                </div>
             </div>
 
             <div class="service-card">
+                <div class="service-card-image">
+                    <img src="{{ url_for('static', filename='images/teknik-servis/tablet-repair.jpg') }}" 
+                         alt="Tablet Tamiri">
+                </div>
                 <h3><i class="fas fa-tablet-alt"></i> Tablet Tamiri</h3>
                 <ul>
                     <li>Ekran Değişimi</li>
                     <li>Dokunmatik Tamir</li>
                     <li>Şarj Soketi Değişimi</li>
                     <li>Yazılım Yükleme</li>
+                    <li>Anakart Tamiri</li>
+                    <li>Kasa Değişimi</li>
                 </ul>
+                <div class="service-brands">
+                    <span>iPad</span>
+                    <span>Samsung Tab</span>
+                    <span>Lenovo Tab</span>
+                </div>
             </div>
 
             <div class="service-card">
+                <div class="service-card-image">
+                    <img src="{{ url_for('static', filename='images/teknik-servis/laptop-repair.jpg') }}" 
+                         alt="Laptop Tamiri"
+                         >
+                </div>
                 <h3><i class="fas fa-laptop"></i> Laptop Tamiri</h3>
                 <ul>
                     <li>Format Atma</li>
                     <li>Parça Değişimi</li>
                     <li>Yazılım Kurulumu</li>
                     <li>Veri Kurtarma</li>
+                    <li>Ekran Değişimi</li>
+                    <li>Klavye Değişimi</li>
                 </ul>
+                <div class="service-brands">
+                    <span>Apple</span>
+                    <span>Dell</span>
+                    <span>HP</span>
+                    <span>Lenovo</span>
+                </div>
             </div>
         </div>
 
+        <!-- Neden Biz? -->
+        <div class="why-choose-us">
+            <h2>Neden Bizi Seçmelisiniz?</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-clock"></i>
+                    <h4>Hızlı Servis</h4>
+                    <p>Çoğu tamir işlemi aynı gün içinde tamamlanır</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4>Garantili Hizmet</h4>
+                    <p>Tüm tamir işlemlerimiz garantilidir</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-tools"></i>
+                    <h4>Uzman Kadro</h4>
+                    <p>Deneyimli teknisyenlerimizle kaliteli hizmet</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <h4>Uygun Fiyat</h4>
+                    <p>Rekabetçi fiyatlarla kaliteli hizmet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- İletişim Bilgileri -->
         <div class="contact-info-card">
             <h3>İletişim Bilgileri</h3>
             <div class="contact-info-list">
@@ -46,7 +115,14 @@
                     <i class="fas fa-phone"></i>
                     <div>
                         <strong>Telefon</strong>
-                        <p>0539 586 2718</p>
+                        <p><a href="tel:05395862718">0539 586 2718</a></p>
+                    </div>
+                </div>
+                <div class="contact-info-item">
+                    <i class="fab fa-whatsapp"></i>
+                    <div>
+                        <strong>WhatsApp</strong>
+                        <p><a href="https://wa.me/05395862718">0539 586 2718</a></p>
                     </div>
                 </div>
                 <div class="contact-info-item">
@@ -54,6 +130,7 @@
                     <div>
                         <strong>Çalışma Saatleri</strong>
                         <p>Hafta içi: 09:00 - 18:00</p>
+                        <p>Cumartesi: 09:00 - 14:00</p>
                     </div>
                 </div>
                 <div class="contact-info-item">
@@ -66,9 +143,15 @@
             </div>
         </div>
 
+        <!-- Önemli Bilgilendirme -->
         <div class="important-notice">
             <h4>Önemli Bilgilendirme</h4>
-            <p>Cihazınızı tamir için getirmeden önce verilerinizi yedeklemenizi öneririz. Veri kaybından firmamız sorumlu değildir.</p>
+            <ul>
+                <li>Cihazınızı tamir için getirmeden önce verilerinizi yedeklemenizi öneririz.</li>
+                <li>Veri kaybından firmamız sorumlu değildir.</li>
+                <li>Tamir süreleri cihazın durumuna göre değişiklik gösterebilir.</li>
+                <li>Ücretsiz arıza tespiti yapılmaktadır.</li>
+            </ul>
         </div>
     </div>
 </div>

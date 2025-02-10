@@ -1986,3 +1986,251 @@ body.menu-open {
 .mobile-nav .nav-link.teknik-servis:hover {
     background-color: #0056b3;
 } 
+
+/* Teknik Servis Sayfası Stilleri */
+.teknik-servis-hero {
+    background: linear-gradient(rgba(0, 123, 255, 0.9), rgba(0, 123, 255, 0.7)), 
+                url('../images/teknik-servis/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 60px 0;
+    margin-bottom: 40px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.hero-content h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+/* Hizmet Kartları */
+.service-card {
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+}
+
+.service-card-image {
+    height: 200px;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+    margin: -25px -25px 20px -25px;
+}
+
+.service-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover .service-card-image img {
+    transform: scale(1.1);
+}
+
+.service-card h3 {
+    color: #007bff;
+    font-size: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.service-card h3 i {
+    margin-right: 10px;
+}
+
+.service-card ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+}
+
+.service-card ul li {
+    margin-bottom: 10px;
+    padding-left: 25px;
+    position: relative;
+}
+
+.service-card ul li:before {
+    content: "\f00c";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: #28a745;
+    position: absolute;
+    left: 0;
+}
+
+.service-brands {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.service-brands span {
+    background: #f0f0f0;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Neden Biz? Section */
+.why-choose-us {
+    text-align: center;
+    padding: 60px 0;
+}
+
+.why-choose-us h2 {
+    margin-bottom: 40px;
+    color: #333;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+.feature-item {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.feature-item:hover {
+    transform: translateY(-5px);
+}
+
+.feature-item i {
+    font-size: 40px;
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.feature-item h4 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* İletişim Kartı */
+.contact-info-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 30px;
+    margin-top: 40px;
+}
+
+.contact-info-card h3 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.contact-info-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.contact-info-item {
+    display: flex;
+    align-items: center;
+}
+
+.contact-info-item i {
+    font-size: 24px;
+    color: #007bff;
+    margin-right: 15px;
+}
+
+.contact-info-item a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.contact-info-item a:hover {
+    text-decoration: underline;
+}
+
+/* Önemli Bilgilendirme */
+.important-notice {
+    background: #e7f5ff;
+    border-left: 4px solid #007bff;
+    padding: 20px;
+    margin-top: 40px;
+    border-radius: 0 8px 8px 0;
+}
+
+.important-notice h4 {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.important-notice ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.important-notice ul li {
+    padding-left: 20px;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.important-notice ul li:before {
+    content: "•";
+    color: #007bff;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+/* Responsive Düzenlemeler */
+@media (max-width: 768px) {
+    .teknik-servis-hero {
+        padding: 40px 0;
+    }
+
+    .hero-content h1 {
+        font-size: 28px;
+    }
+
+    .service-card-image {
+        height: 160px;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-info-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Grid Layout */
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}

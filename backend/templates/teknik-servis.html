@@ -1,50 +1,74 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="text-center mb-4">Teknik Servis Hizmetlerimiz</h1>
-            
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h3>Sunduğumuz Hizmetler</h3>
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-check text-success me-2"></i> Telefon Tamiri</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Tablet Tamiri</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Laptop Tamiri</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Ekran Değişimi</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Yazılım Güncelleme</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Veri Kurtarma</li>
-                    </ul>
-                </div>
+<div class="teknik-servis-container">
+    <div class="container">
+        <div class="teknik-servis-header">
+            <h1>Teknik Servis Hizmetlerimiz</h1>
+        </div>
+
+        <div class="service-grid">
+            <div class="service-card">
+                <h3><i class="fas fa-mobile-alt"></i> Telefon Tamiri</h3>
+                <ul>
+                    <li>Ekran Değişimi</li>
+                    <li>Batarya Değişimi</li>
+                    <li>Şarj Soketi Tamiri</li>
+                    <li>Yazılım Güncelleme</li>
+                </ul>
             </div>
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h3>Neden Biz?</h3>
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-star text-warning me-2"></i> Uzman Teknik Kadro</li>
-                        <li><i class="fas fa-star text-warning me-2"></i> Orijinal Yedek Parça</li>
-                        <li><i class="fas fa-star text-warning me-2"></i> Hızlı Servis</li>
-                        <li><i class="fas fa-star text-warning me-2"></i> Garanti Kapsamında Hizmet</li>
-                    </ul>
-                </div>
+            <div class="service-card">
+                <h3><i class="fas fa-tablet-alt"></i> Tablet Tamiri</h3>
+                <ul>
+                    <li>Ekran Değişimi</li>
+                    <li>Dokunmatik Tamir</li>
+                    <li>Şarj Soketi Değişimi</li>
+                    <li>Yazılım Yükleme</li>
+                </ul>
             </div>
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h3>İletişim Bilgileri</h3>
-                    <p><i class="fas fa-phone me-2"></i> Telefon: <a href="tel:+905XXXXXXXXX">0555 555 55 55</a></p>
-                    <p><i class="fas fa-map-marker-alt me-2"></i> Adres: [Adres Bilgisi]</p>
-                    <p><i class="fas fa-clock me-2"></i> Çalışma Saatleri: Hafta içi 09:00 - 18:00</p>
+            <div class="service-card">
+                <h3><i class="fas fa-laptop"></i> Laptop Tamiri</h3>
+                <ul>
+                    <li>Format Atma</li>
+                    <li>Parça Değişimi</li>
+                    <li>Yazılım Kurulumu</li>
+                    <li>Veri Kurtarma</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="contact-info-card">
+            <h3>İletişim Bilgileri</h3>
+            <div class="contact-info-list">
+                <div class="contact-info-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <strong>Telefon</strong>
+                        <p>0539 586 2718</p>
+                    </div>
+                </div>
+                <div class="contact-info-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <strong>Çalışma Saatleri</strong>
+                        <p>Hafta içi: 09:00 - 18:00</p>
+                    </div>
+                </div>
+                <div class="contact-info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <strong>Adres</strong>
+                        <p>[Adres Bilgisi]</p>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="alert alert-info">
-                <h4 class="alert-heading">Önemli Bilgi!</h4>
-                <p>Cihazınızı tamir için getirmeden önce lütfen yedekleme işlemlerinizi yapınız. Veri kaybından firmamız sorumlu değildir.</p>
-            </div>
+        <div class="important-notice">
+            <h4>Önemli Bilgilendirme</h4>
+            <p>Cihazınızı tamir için getirmeden önce verilerinizi yedeklemenizi öneririz. Veri kaybından firmamız sorumlu değildir.</p>
         </div>
     </div>
 </div>

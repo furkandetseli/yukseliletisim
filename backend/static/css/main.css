@@ -1474,7 +1474,7 @@ body.menu-open {
 /* Temel boyutlandırmalar için viewport unit'leri kullanalım */
 .logo img {
     height: 40px; /* Sabit yerine dinamik */
-    max-height: 8vw; /* Viewport genişliğine göre maksimum yükseklik */
+    max-height: 20vw; /* Viewport genişliğine göre maksimum yükseklik */
 }
 
 /* Ana header için responsive ayarlar */
@@ -1483,7 +1483,7 @@ body.menu-open {
 }
 
 .main-header .container {
-    gap: clamp(10px, 3vw, 40px); /* Dinamik gap */
+    gap: clamp(16px, 3vw, 40px); /* Dinamik gap */
 }
 
 /* Search container için responsive düzenleme */
@@ -1733,7 +1733,7 @@ body.menu-open {
 
 .logo img {
     width: auto;
-    height: 70px;
+    height: 100px;
     max-width: 100%;
     object-fit: contain;
     transition: transform 0.3s ease;
@@ -1988,17 +1988,7 @@ body.menu-open {
 } 
 
 /* Teknik Servis Sayfası Stilleri */
-.teknik-servis-hero {
-    background: linear-gradient(rgba(0, 123, 255, 0.9), rgba(0, 123, 255, 0.7)), 
-                url('../images/teknik-servis/hero-bg.jpg');
-    background-size: cover;
-    background-position: center;
-    color: white;
-    padding: 60px 0;
-    margin-bottom: 40px;
-    border-radius: 8px;
-    text-align: center;
-}
+
 
 .hero-content h1 {
     font-size: 36px;
@@ -2233,4 +2223,111 @@ body.menu-open {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
     margin-bottom: 40px;
+}
+
+.teknik-servis-hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                url('../images/teknik-servis/hero-background.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 80px 20px;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 40px;
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+/* Hero Buttons */
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.hero-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    color: white;
+    min-width: 180px;
+}
+
+.hero-button i {
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+
+.phone-button {
+    background-color: #007bff;
+}
+
+.phone-button:hover {
+    background-color: #0069d9;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.whatsapp-button {
+    background-color: #25d366;
+}
+
+.whatsapp-button:hover {
+    background-color: #1fba58;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.map-button {
+    background-color: #dc3545;
+}
+
+.map-button:hover {
+    background-color: #c82333;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-content p {
+        font-size: 1rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .hero-button {
+        width: 100%;
+        max-width: 250px;
+    }
 }
